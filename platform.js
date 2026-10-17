@@ -334,6 +334,16 @@ async function calTool(tool, input) {
     else { body.start = { dateTime: input.startTime, timeZone: tz() }; body.end = { dateTime: input.endTime, timeZone: tz() }; }
     return gfetch(`${CAL_API}/calendars/${enc(input.calendarId)}/events`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   }
+  if (tool === 'update_event') {
+    const body = {};
+    ['summary', 'location', 'description'].forEach(k => { if (input[k] !== undefined) body[k] = input[k]; });
+    if (input.startTime) {
+      if (input.allDay) { body.start = { date: input.startTime.slice(0, 10), dateTime: null }; body.end = { date: input.endTime.slice(0, 10), dateTime: null }; }
+      else { body.start = { dateTime: input.startTime, timeZone: tz(), date: null }; body.end = { dateTime: input.endTime, timeZone: tz(), date: null }; }
+    }
+    return gfetch(`${CAL_API}/calendars/${enc(input.calendarId)}/events/${enc(input.eventId)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  }
+  if (tool === 'move_event') return gfetch(`${CAL_API}/calendars/${enc(input.calendarId)}/events/${enc(input.eventId)}/move?destination=${enc(input.destination)}`, { method: 'POST' });
   if (tool === 'delete_event') return gfetch(`${CAL_API}/calendars/${enc(input.calendarId)}/events/${enc(input.eventId)}`, { method: 'DELETE' });
   throw { code: 'tool_error', message: 'Unknown action' };
 }

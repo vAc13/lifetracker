@@ -260,7 +260,7 @@ a.nm{color:inherit;text-decoration:none} a.nm:hover{text-decoration:underline}
 .alld{display:flex;gap:6px;align-items:flex-start;padding:6px 10px;border-top:1px solid var(--line-soft)}
 .alld .lb{font-size:10px;font-weight:700;color:var(--muted);width:38px;flex:none;padding-top:3px;letter-spacing:.04em}
 .alld .ls{display:flex;flex-wrap:wrap;gap:4px;min-width:0;flex:1}
-.alld a,.alld span.ae{font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px;background:color-mix(in srgb,var(--c) 22%,var(--surface));border-left:3px solid var(--c);color:var(--ink);text-decoration:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.alld .ae{font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px;background:color-mix(in srgb,var(--c) 22%,var(--surface));border-left:3px solid var(--c);color:var(--ink);text-decoration:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tgrid{position:relative;overflow-y:auto;overscroll-behavior:contain;border-top:1px solid var(--line-soft);height:520px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .tg-in{position:relative;margin-left:48px;margin-right:8px}
 .tg-h{position:absolute;left:0;right:0;border-top:1px solid var(--line-soft);pointer-events:none}
@@ -320,6 +320,31 @@ a.nm{color:inherit;text-decoration:none} a.nm:hover{text-decoration:underline}
 .sheet-h .icon-btn{margin-left:auto}
 .cats{display:flex;flex-wrap:wrap;gap:6px}
 
+.linklike{border:0;background:none;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+button.nm.linklike:hover{text-decoration:underline}
+.alld button.ae{border:0;border-left:3px solid var(--c);cursor:pointer;font-family:inherit}
+.tev{cursor:pointer;touch-action:pan-y}
+.tev.ghost{opacity:0;pointer-events:none}
+.tdraft.exist{border:0;border-left:3px solid var(--dc);background:color-mix(in srgb,var(--dc) 45%,var(--surface));color:var(--ink);box-shadow:0 10px 28px rgba(0,0,0,.35),0 0 0 1px color-mix(in srgb,var(--dc) 70%,transparent);border-radius:6px;padding:3px 6px}
+.tdraft.exist .dt{padding-left:0;font-weight:500;font-size:11px}
+.tdraft.exist b.dt{font-weight:700;font-size:12px}
+.tdraft.exist .dh::after{border-color:var(--dc);background:var(--dc)}
+.tdraft.exist .dh.dh-s{left:auto;right:10px}
+.tdraft.exist .dh.dh-e{right:auto;left:4px}
+.evd .evf-h{margin-bottom:4px}
+.evd-title{font-family:var(--f-display);font-stretch:85%;font-size:26px;font-weight:700;margin:10px 0 2px;overflow-wrap:anywhere}
+.evd-loc{color:var(--ink-2);font-size:15px}
+.evd-when{color:var(--ink-2);font-size:15px;line-height:1.5;margin:8px 0 14px;font-variant-numeric:tabular-nums}
+.evd-row{display:flex;align-items:center;gap:10px;justify-content:space-between;font-size:16px;min-height:36px}
+.evd-row .v{display:flex;align-items:center;gap:6px;color:var(--ink-2);min-width:0}
+.evd-row select{border:0;background:none;font-size:16px;color:var(--ink-2);text-align:right;-webkit-appearance:none;appearance:none;min-width:0;max-width:200px;padding:4px 0;cursor:pointer}
+.evd-row svg{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2}
+.evd-notes{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;color:var(--ink-2)}
+.evd-link{color:var(--accent-text);font-weight:600;text-decoration:none;font-size:15px}
+.evd-del,.evd-cancel{width:100%;border:0;background:var(--surface-2);color:var(--crit-text);font-weight:600;font-size:16px;padding:13px;border-radius:12px;margin-top:14px}
+.evd-del.strong{background:var(--crit);color:#fff;margin-top:8px}
+.evd-cancel{color:var(--ink);margin-top:8px}
+.evd-confirm{margin-top:14px;text-align:center}
 /* toast */
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;z-index:60;max-width:calc(100% - 32px)}
 @media (min-width:900px){.toast{bottom:24px}}
@@ -1140,7 +1165,7 @@ function normEvents(payload, cal) {
     const allDay = !!e.start.date;
     const st = allDay ? parse(e.start.date) : new Date(e.start.dateTime);
     const en = allDay ? parse((e.end && e.end.date) || e.start.date) : new Date((e.end && e.end.dateTime) || e.start.dateTime);
-    return { id: e.id, title: e.summary || '(No title)', allDay, start: st, end: en, link: e.htmlLink, loc: e.location, cal, recurring: !!e.recurringEventId };
+    return { id: e.id, title: e.summary || '(No title)', allDay, start: st, end: en, link: e.htmlLink, loc: e.location, desc: e.description || '', cal, recurring: !!e.recurringEventId };
   });
 }
 function watchCal(slot, start, endExcl) {
@@ -1221,7 +1246,8 @@ function calLegend() {
 const evTime = e => e.allDay ? 'All day' : hm(e.start);
 function canWrite(id) { const r = S.calRole[id]; if (r) return r === 'owner' || r === 'writer'; return !/#holiday@|@import\.calendar\.google\.com$/.test(id); }
 const evDel = e => { if (!S.mcp || !canWrite(e.cal.id)) return ''; const id = `${e.cal.id}|${e.id}`; return S.confirm === `ev:${id}` ? `<button class="confirm" data-act="del" data-kind="ev" data-id="${esc(id)}">${e.recurring ? 'Delete this one' : 'Confirm delete'}</button>` : `<button class="x" data-act="del" data-kind="ev" data-id="${esc(id)}" aria-label="Delete event">×</button>`; };
-const evTitle = e => e.link ? `<a class="nm" href="${esc(e.link)}" target="_blank" rel="noopener">${esc(e.title)}</a>` : `<span class="nm">${esc(e.title)}</span>`;
+const evKey = e => `${e.cal.id}|${e.id}`;
+const evTitle = e => `<button class="nm linklike" data-act="ev-open" data-k="${esc(evKey(e))}">${esc(e.title)}</button>`;
 const evRow = e => `<div class="event" style="border-left:3px solid ${e.cal.color}"><span class="tm">${evTime(e)}</span><span style="min-width:0">${evTitle(e)}<br><span class="lc">${!e.allDay ? `${hm(e.start)}–${hm(e.end)} · ` : ''}${esc(e.cal.name)}${e.loc ? ' · ' + esc(e.loc) : ''}</span></span>${evDel(e)}</div>`;
 const evCard = e => `<div class="event ev-c" style="border-left:3px solid ${e.cal.color}"><span class="tm">${e.allDay ? 'All day' : `${hm(e.start)}–${hm(e.end)}`}</span>${evTitle(e)}<span class="lc">${esc(e.cal.name)}${e.loc ? ' · ' + esc(e.loc) : ''}</span>${evDel(e) ? `<span style="align-self:flex-end">${evDel(e)}</span>` : ''}</div>`;
 function evList(list) {
@@ -1252,7 +1278,7 @@ function calWriteMsg(e, verb) {
     : c === 'needs_reauth' ? 'Your Google sign-in expired. Tap "Sign in to sync" at the top, then try again.'
     : c === 'server_not_connected' ? 'Google Calendar is not connected. Add it in claude.ai Settings → Connectors.'
     : c === 'tool_error' ? `Google Calendar refused this: ${e.message || 'unknown error'}`
-    : (c === 'server_unavailable' || c === 'upstream_error') ? `Couldn't confirm the event was ${verb === 'add' ? 'added' : 'deleted'}. Your calendar is refreshing, so check it before trying again.`
+    : (c === 'server_unavailable' || c === 'upstream_error') ? `Couldn't confirm the event was ${({ add: 'added', delete: 'deleted', change: 'changed', move: 'moved' })[verb] || 'saved'}. Your calendar is refreshing, so check it before trying again.`
     : `Couldn't ${verb} the event.`;
 }
 function deleteEvent(compound) {
@@ -1299,6 +1325,7 @@ function layoutDay(list, d) {
 }
 function draftHTML() {
   const D = S.draft; if (!D) return '';
+  if (D.evKey) return `<div class="tdraft exist" id="tdraft" style="top:${mm2y(D.s)}px;height:${mm2y(D.e - D.s)}px;--dc:${D.color}"><b class="dt">${esc(D.title)}</b><span class="dt" id="tdraft-t">${m2hm(D.s)} – ${m2hm(D.e)}</span><i class="dh dh-s" data-h="top" aria-hidden="true"></i><i class="dh dh-e" data-h="bot" aria-hidden="true"></i></div>`;
   return `<div class="tdraft ${D.saving ? 'saving' : ''}" id="tdraft" style="top:${mm2y(D.s)}px;height:${mm2y(D.e - D.s)}px"><span class="dt" id="tdraft-t">${D.title ? esc(D.title) + ' · ' : ''}${m2hm(D.s)} – ${m2hm(D.e)}</span><i class="dh dh-s" data-h="top" aria-hidden="true"></i><i class="dh dh-e" data-h="bot" aria-hidden="true"></i></div>`;
 }
 function draftCal() {
@@ -1307,7 +1334,7 @@ function draftCal() {
   return cals.find(x => x.id === id) || cals[0] || null;
 }
 function peekHTML(cls = '') {
-  const D = S.draft; if (!D || D.saving || (S.sheet && S.sheet.type === 'event')) return '';
+  const D = S.draft; if (!D || D.saving || D.evKey || (S.sheet && S.sheet.type === 'event')) return '';
   const cal = draftCal();
   return `<div class="evpeek ${cls}" id="evpeek" role="dialog" aria-label="New event">
     <div class="grab"></div>
@@ -1319,13 +1346,14 @@ function peekHTML(cls = '') {
 function updateDraftDOM() {
   const D = S.draft, el = $('#tdraft'); if (!D || !el) return;
   el.style.top = mm2y(D.s) + 'px'; el.style.height = mm2y(D.e - D.s) + 'px';
-  const t = $('#tdraft-t'); if (t) t.textContent = `${D.title ? D.title + ' · ' : ''}${m2hm(D.s)} – ${m2hm(D.e)}`;
+  const t = $('#tdraft-t'); if (t) t.textContent = `${D.title && !D.evKey ? D.title + ' · ' : ''}${m2hm(D.s)} – ${m2hm(D.e)}`;
   const pt = $('#pk-time'), pd = $('#pk-dur'); if (pt) pt.textContent = `${m2hm(D.s)} → ${m2hm(D.e)}`; if (pd) pd.textContent = durTxt(D.e - D.s);
 }
 function mountDraft(mini) {
   const col = $('#tg-col'); if (!col) return;
   const old = $('#tdraft'); if (old) old.remove();
   col.insertAdjacentHTML('beforeend', draftHTML());
+  markGhost();
   const op = $('#evpeek');
   if (op && !op.classList.contains('out')) { op.outerHTML = peekHTML(mini ? 'mini' : ''); setMini(!!mini); }
   else { if (op) op.remove(); $('#main').insertAdjacentHTML('beforeend', peekHTML('in' + (mini ? ' mini' : ''))); setMini(!!mini); const p = $('#evpeek'); if (p) p.addEventListener('animationend', () => p.classList.remove('in'), { once: true }); }
@@ -1337,8 +1365,11 @@ function setMini(on) {
   const more = $('.pk-more', p); if (more) p.style.setProperty('--mh', (more.offsetHeight + 4) + 'px');
   p.classList.toggle('mini', on);
 }
+function markGhost() { document.querySelectorAll('#tg-col .tev').forEach(x => x.classList.toggle('ghost', !!(S.draft && S.draft.evKey && x.dataset.k === S.draft.evKey))); }
 function clearDraft() {
+  const wasEv = S.draft && S.draft.evKey;
   S.draft = null; const a = $('#tdraft'), b = $('#evpeek'); if (a) a.remove();
+  if (wasEv) { markGhost(); scheduleRender(); }
   if (b) { b.removeAttribute('id'); document.body.appendChild(b); void b.offsetHeight; b.classList.add('out'); setTimeout(() => b.remove(), 260); }
   syncPeekSpace();
 }
@@ -1369,7 +1400,7 @@ function renderDayView(a, st) {
   const t = todayISO(), mon = mondayOf(a), evs = st.kind === 'ok' ? eventsOn(st.events, a) : [];
   const strip = [0, 1, 2, 3, 4, 5, 6].map(i => { const d = addDays(mon, i); return `<button data-act="c-day" data-d="${d}" class="${d === t ? 'today' : ''}" aria-pressed="${d === a}" aria-label="${esc(fmtLong(d))}">${parse(d).toLocaleDateString('en-GB', { weekday: 'short' })}<b>${parse(d).getDate()}</b></button>`; }).join('');
   const allDay = evs.filter(e => e.allDay);
-  const alld = allDay.length ? `<div class="alld"><span class="lb">ALL-DAY</span><div class="ls">${allDay.map(e => e.link ? `<a href="${esc(e.link)}" target="_blank" rel="noopener" style="--c:${e.cal.color}">${esc(e.title)}</a>` : `<span class="ae" style="--c:${e.cal.color}">${esc(e.title)}</span>`).join('')}</div></div>` : '';
+  const alld = allDay.length ? `<div class="alld"><span class="lb">ALL-DAY</span><div class="ls">${allDay.map(e => `<button class="ae" data-act="ev-open" data-k="${esc(evKey(e))}" style="--c:${e.cal.color}">${esc(e.title)}</button>`).join('')}</div></div>` : '';
   let lines = '';
   for (let h = 0; h < 24; h++) lines += `<div class="tg-h" style="top:${h * HOUR_H}px">${h ? `<span>${pad(h)}:00</span>` : ''}</div><div class="tg-h half" style="top:${h * HOUR_H + HOUR_H / 2}px"></div>`;
   const now = new Date(), nowM = now.getHours() * 60 + now.getMinutes();
@@ -1377,8 +1408,8 @@ function renderDayView(a, st) {
     const e = x.e, h = mm2y(x.en - x.s), w = 100 / x.n;
     const inner = `<b>${esc(e.title)}</b>${h >= 34 ? `<small>${hm(e.start)}–${hm(e.end)}</small>` : ''}`;
     const style = `top:${mm2y(x.s)}px;height:${Math.max(h - 2, 16)}px;left:calc(${x.col * w}% + 1px);width:calc(${w}% - 3px);--c:${e.cal.color}`;
-    const cls = `tev ${+e.end < +now ? 'past' : ''}`;
-    return e.link ? `<a class="${cls}" href="${esc(e.link)}" target="_blank" rel="noopener" style="${style}">${inner}</a>` : `<div class="${cls}" style="${style}">${inner}</div>`;
+    const k = evKey(e), cls = `tev ${+e.end < +now ? 'past' : ''} ${S.draft && S.draft.evKey === k ? 'ghost' : ''}`;
+    return `<div class="${cls}" role="button" tabindex="0" data-act="ev-open" data-k="${esc(k)}" style="${style}">${inner}</div>`;
   }).join('');
   const D = S.draft && S.draft.date === a ? draftHTML() : '';
   return `<section class="card dayv"><div class="wstrip">${strip}</div>${alld}
@@ -1426,6 +1457,55 @@ function gestStart(mode, ev, extra = {}) {
   setMini(true);
   cancelAnimationFrame(G.raf); G.raf = requestAnimationFrame(edgeLoop);
 }
+function findEv(key) {
+  for (const slot of ['range', 'day']) { const C = S.cal[slot]; if (!C || !C.byCal) continue; for (const id in C.byCal) { const e = C.byCal[id].find(x => evKey(x) === key); if (e) return e; } }
+  return null;
+}
+function liftable(e, date) {
+  if (!S.mcp || e.allDay || !canWrite(e.cal.id)) return false;
+  const s0 = parse(date), e0 = parse(addDays(date, 1));
+  return +e.start >= +s0 && +e.end <= +e0;
+}
+const minsOf = (d, date) => Math.round((+d - +parse(date)) / 6e4);
+const minToISO = (date, m) => m >= 1440 ? `${addDays(date, 1)}T00:00:00` : `${date}T${m2hm(m)}:00`;
+/* Apple-style: hold an event to pick it up. It follows the finger (same length); the dots change start/end. */
+function liftEvent(g, ev) {
+  const e = findEv(g.key); if (!e) { G = null; return; }
+  const s = minsOf(e.start, g.date), en = minsOf(e.end, g.date);
+  S.draft = { date: g.date, s, e: en, evKey: g.key, title: e.title, color: e.cal.color, saved: { s, e: en } };
+  mountDraft();
+  if (navigator.vibrate) try { navigator.vibrate(8); } catch (x) {}
+  gestStart('move', ev, { off: gridMinutes(ev.clientY) - s, lifted: true });
+}
+function saveEvTime(D) {
+  if (!D || !D.evKey || (D.saved.s === D.s && D.saved.e === D.e)) return;
+  const e = findEv(D.evKey); if (!e) return;
+  const old = { start: e.start, end: e.end, saved: { ...D.saved } }, s = D.s, en = D.e, date = D.date;
+  e.start = new Date(+parse(date) + s * 6e4); e.end = new Date(+parse(date) + en * 6e4); D.saved = { s, e: en };
+  S.mcp.callTool(CAL, 'update_event', { calendarId: e.cal.id, eventId: e.id, startTime: minToISO(date, s), endTime: minToISO(date, en) })
+    .then(() => { toast(`Moved to ${m2hm(s)}–${m2hm(en)}`); refreshCal(); })
+    .catch(err => {
+      e.start = old.start; e.end = old.end;
+      if (S.draft && S.draft.evKey === D.evKey) { Object.assign(S.draft, { s: old.saved.s, e: old.saved.e, saved: old.saved }); updateDraftDOM(); }
+      toast(calWriteMsg(err, 'change'), 5000); refreshCal(); scheduleRender();
+    });
+}
+function openEvView(key) {
+  if (S.draft && !S.draft.evKey) clearDraft();
+  S.sheet = { type: 'evview', key }; renderSheet();
+}
+function moveEvent(key, dest) {
+  const e = findEv(key), to = (S.calendars || []).find(x => x.id === dest); if (!e || !to || e.cal.id === dest) return;
+  const from = e.cal, nk = `${dest}|${e.id}`;
+  const shift = (a, b) => ['day', 'range'].forEach(k2 => { const C = S.cal[k2]; if (!C.byCal) return; if (C.byCal[a.id]) C.byCal[a.id] = C.byCal[a.id].filter(x => x.id !== e.id); if (C.byCal[b.id] && !C.byCal[b.id].some(x => x.id === e.id)) C.byCal[b.id] = [...C.byCal[b.id], e]; });
+  shift(from, to); e.cal = to;
+  if (S.sheet && S.sheet.key === key) S.sheet.key = nk;
+  if (S.draft && S.draft.evKey === key) clearDraft();
+  render();
+  return S.mcp.callTool(CAL, 'move_event', { calendarId: from.id, eventId: e.id, destination: dest })
+    .then(() => { toast(`Moved to ${to.name}`); refreshCal(); })
+    .catch(err => { shift(to, from); e.cal = from; if (S.sheet && S.sheet.key === nk) S.sheet.key = key; render(); toast(calWriteMsg(err, 'move'), 5000); refreshCal(); throw err; });
+}
 function newDraftAt(m, date, mini) {
   const s = clamp(snapM(m - 15), 0, 1440 - 30);
   S.draft = { date, s, e: s + 30, cal: (draftCal() || {}).id };
@@ -1439,7 +1519,13 @@ document.addEventListener('pointerdown', ev => {
   if (S.draft && S.draft.saving) return;
   if (h && S.draft) { ev.preventDefault(); gestStart(h.dataset.h, ev, { off: h.dataset.h === 'bot' ? S.draft.e - gridMinutes(ev.clientY) : 0 }); return; }
   if (dr && S.draft) { ev.preventDefault(); gestStart('move', ev, { off: gridMinutes(ev.clientY) - S.draft.s }); return; }
-  if (ev.target.closest('.tev')) return;
+  const tv = ev.target.closest('.tev');
+  if (tv) {
+    const e = findEv(tv.dataset.k); if (!e || !liftable(e, date)) return;
+    G = { mode: 'pressEv', active: false, id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, y: ev.clientY, key: tv.dataset.k, date, mouse: ev.pointerType === 'mouse' };
+    if (!G.mouse) G.timer = setTimeout(() => { if (G && G.mode === 'pressEv') liftEvent(G, { pointerId: G.id, clientY: G.y }); }, 420);
+    return;
+  }
   const m = gridMinutes(ev.clientY);
   G = { mode: 'press', active: false, id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, y: ev.clientY, m, date, mouse: ev.pointerType === 'mouse', hadDraft: !!S.draft };
   if (!G.mouse) G.timer = setTimeout(() => {
@@ -1451,6 +1537,12 @@ document.addEventListener('pointerdown', ev => {
 document.addEventListener('pointermove', ev => {
   if (!G || ev.pointerId !== G.id) return;
   G.y = ev.clientY;
+  if (G.mode === 'pressEv') {
+    const moved = Math.hypot(ev.clientX - G.x0, ev.clientY - G.y0);
+    if (G.mouse && moved > 5) { liftEvent(G, ev); G.moved = true; gestApply(ev.clientY); }
+    else if (!G.mouse && moved > 8) { clearTimeout(G.timer); G = null; }
+    return;
+  }
   if (G.mode === 'press') {
     const moved = Math.hypot(ev.clientX - G.x0, ev.clientY - G.y0);
     if (G.mouse && moved > 5) { const a = clamp(snapM(G.m), 0, 1440 - MIN_DUR); S.draft = { date: G.date, s: a, e: a + MIN_DUR, cal: (draftCal() || {}).id }; mountDraft(true); gestStart('range', ev, { anchor: a }); gestApply(ev.clientY); }
@@ -1468,6 +1560,11 @@ function gestEnd(ev) {
     else if (g.mouse) { newDraftAt(g.m, g.date); ensureDraftVisible(); }
     return;
   }
+  const D = S.draft;
+  if (g.mode === 'pressEv') return;
+  if (D && (g.lifted || D.evKey)) S.noClickUntil = Date.now() + 500;
+  if (D && !g.moved && g.mode === 'move' && !g.lifted) { if (D.evKey) openEvView(D.evKey); else openDraftEditor(); return; }
+  if (D && D.evKey) { saveEvTime(D); ensureDraftVisible(); return; }
   setMini(false); ensureDraftVisible();
 }
 document.addEventListener('pointerup', gestEnd); document.addEventListener('pointercancel', gestEnd);
@@ -1523,17 +1620,41 @@ function renderSheetInner() {
   el.hidden = false;
   const c = cfg();
   const close = `<button class="icon-btn" data-act="sheet-close" aria-label="Close"><svg viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>`;
+  if (sh.type === 'evview') {
+    const e = findEv(sh.key);
+    if (!e) { el.innerHTML = `<div class="sheet-card evf"><div class="sheet-h"><h2 style="font-size:20px">Event</h2>${close}</div><div class="empty">This event is no longer in your calendar.</div></div>`; return; }
+    const w = canWrite(e.cal.id) && !!S.mcp, d0 = iso(e.start), lastDay = e.allDay ? addDays(iso(e.end), -1) : iso(new Date(+e.end - 1));
+    const longD = d => parse(d).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const when = e.allDay ? (lastDay > d0 ? `All-day from ${esc(fmtShort(d0))}<br>to ${esc(fmtShort(lastDay))}` : `${esc(longD(d0))}<br>All-day`)
+      : lastDay > d0 ? `from ${hm(e.start)}, ${esc(fmtShort(d0))}<br>to ${hm(e.end)}, ${esc(fmtShort(iso(e.end)))}` : `${esc(longD(d0))}<br>from ${hm(e.start)} to ${hm(e.end)}`;
+    const wcals = (S.calendars || []).filter(x => canWrite(x.id));
+    const calRow = w && !e.recurring && wcals.length > 1
+      ? `<label class="evd-row" for="f-evv-cal"><span>Calendar</span><span class="v"><i class="dot" style="background:${e.cal.color}"></i><select id="f-evv-cal">${wcals.map(x => `<option value="${esc(x.id)}" ${x.id === e.cal.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span></label>`
+      : `<div class="evd-row"><span>Calendar</span><span class="v"><i class="dot" style="background:${e.cal.color}"></i>${esc(e.cal.name)}</span></div>${w && e.recurring ? '<div class="sub">Repeating events can only be moved to another calendar in Google Calendar.</div>' : ''}`;
+    el.innerHTML = `<div class="sheet-card evf evd" role="dialog" aria-modal="true" aria-label="Event details">
+      <div class="grab"></div>
+      <div class="evf-h">${close.replace('class="icon-btn"', 'class="icon-btn" style="margin-left:0"')}<div class="end">${w ? '<button class="btn small" data-act="ev-edit">Edit</button>' : ''}</div></div>
+      <h2 class="evd-title">${esc(e.title)}</h2>
+      ${e.loc ? `<div class="evd-loc">${esc(e.loc)}</div>` : ''}
+      <div class="evd-when">${when}${e.recurring ? '<br><span class="sub">Repeating event</span>' : ''}</div>
+      <div class="evf-sec">${calRow}</div>
+      ${e.desc ? `<div class="evf-sec"><div class="evd-notes">${esc(e.desc)}</div></div>` : ''}
+      ${e.link ? `<div class="evf-sec"><a class="evd-link" href="${esc(e.link)}" target="_blank" rel="noopener">Open in Google Calendar</a></div>` : ''}
+      ${w ? (sh.confirmDel ? `<div class="evd-confirm"><div class="sub">${e.recurring ? 'This deletes only this occurrence of the repeating event.' : 'Are you sure you want to delete this event?'}</div><button class="evd-del strong" data-act="ev-del">${e.recurring ? 'Delete This Event Only' : 'Delete Event'}</button><button class="evd-cancel" data-act="ev-del-cancel">Cancel</button></div>` : `<button class="evd-del" data-act="ev-del">Delete Event</button>`) : ''}
+    </div>`;
+    return;
+  }
   if (sh.type === 'event') {
     const cals = (S.calendars || []).filter(x => canWrite(x.id));
     const def = sh.cal || S.lastCal || ((cals.find(x => /@gmail\.com$/.test(x.id)) || cals[0] || {}).id);
     const dcal = cals.find(x => x.id === def) || cals[0];
     const dur = evDurLabel(sh.start, sh.end);
-    el.innerHTML = `<div class="sheet-card evf" role="dialog" aria-modal="true" aria-label="New event">
+    el.innerHTML = `<div class="sheet-card evf" role="dialog" aria-modal="true" aria-label="${sh.edit ? 'Edit event' : 'New event'}">
       <div class="grab"></div>
       ${cals.length ? `<form data-form="event" style="display:flex;flex-direction:column;min-height:0">
         <div class="evf-h">
-          <label class="calpick"><i class="dot" id="f-ev-dot" style="background:${dcal ? dcal.color : 'var(--accent)'}"></i><select id="f-ev-cal" aria-label="Calendar">${cals.map(x => `<option value="${esc(x.id)}" ${x.id === def ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
-          <div class="end"><button class="btn small primary" type="submit" id="f-ev-done" ${(sh.title || '').trim() ? '' : 'disabled'}>Done</button>${close}</div>
+          <label class="calpick"><i class="dot" id="f-ev-dot" style="background:${dcal ? dcal.color : 'var(--accent)'}"></i><select id="f-ev-cal" aria-label="Calendar" ${sh.edit && sh.recurring ? 'disabled' : ''}>${cals.map(x => `<option value="${esc(x.id)}" ${x.id === def ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
+          <div class="end"><button class="btn small primary" type="submit" id="f-ev-done" ${(sh.title || '').trim() ? '' : 'disabled'}>${sh.edit ? 'Save' : 'Done'}</button>${close}</div>
         </div>
         <input class="evf-title" id="f-ev-title" required maxlength="200" autocomplete="off" placeholder="Title" aria-label="Title" value="${esc(sh.title || '')}" enterkeyhint="done">
         <div class="evf-sec">
@@ -1692,7 +1813,7 @@ document.addEventListener('click', ev => {
     case 'tx-new': S.sheet = { type: 'tx', kind: b.dataset.kind, date: S.tab === 'today' ? viewDate() : (S.tab === 'money' && S.money.anchor && S.money.anchor.slice(0, 7) < t.slice(0, 7) ? monthEnd(S.money.anchor.slice(0, 7)) : t) }; renderSheet(); setTimeout(() => { const f = $('#f-tx-amt'); f && f.focus(); }, 30); return;
     case 'tx-kind': S.sheet.kind = v; S.sheet.cat = null; renderSheet(); return;
     case 'tx-cat': S.sheet.cat = v; document.querySelectorAll('[data-act="tx-cat"]').forEach(x => { const on = x.dataset.v === v; x.setAttribute('aria-pressed', on); x.style.cssText = on ? 'background:var(--accent);color:var(--accent-ink);border-color:var(--accent)' : ''; }); return;
-    case 'sheet-close': { const fd = S.sheet && S.sheet.fromDraft; S.sheet = null; renderSheet(); if (fd) clearDraft(); if (pendingRender) render(); return; }
+    case 'sheet-close': { const sh = S.sheet, fd = sh && sh.fromDraft; if (sh && sh.edit && findEv(sh.edit)) { S.sheet = { type: 'evview', key: sh.edit }; renderSheet(); return; } S.sheet = null; renderSheet(); if (fd) clearDraft(); if (pendingRender) render(); return; }
     case 'open-settings': S.sheet = { type: 'settings' }; renderSheet(); return;
     case 'hrange': S.health.range = Number(v); break;
     case 'mon-nav': { const mk = (S.money.anchor || t).slice(0, 7); const nm = Number(b.dataset.dir) > 0 ? nextMonth(mk) : prevMonth(mk); S.money.anchor = nm >= t.slice(0, 7) ? null : nm + '-01'; break; }
@@ -1708,6 +1829,12 @@ document.addEventListener('click', ev => {
     case 'cview': if (v === 'day' && S.calUI.view !== 'day') { const sd = S.calUI.sel || S.calUI.anchor; if (sd) S.calUI.anchor = sd; } S.calUI.view = v; clearDraft(); break;
     case 'c-day': S.calUI.anchor = b.dataset.d === t ? null : b.dataset.d; S.calUI.sel = b.dataset.d; clearDraft(); break;
     case 'draft-cancel': clearDraft(); return;
+    case 'ev-open': { if (Date.now() < (S.noClickUntil || 0)) return; const k = b.dataset.k; if (!findEv(k)) return; if (S.draft && S.draft.evKey) clearDraft(); openEvView(k); return; }
+    case 'ev-edit': { const e = findEv(S.sheet && S.sheet.key); if (!e) return; const d0 = iso(e.start), endD = e.allDay ? addDays(iso(e.end), -1) : iso(e.end);
+      S.sheet = { type: 'event', edit: S.sheet.key, back: true, date: d0, start: e.allDay ? '09:00' : hm(e.start), end: e.allDay ? '10:00' : (endD !== d0 && hm(e.end) === '00:00' ? '00:00' : hm(e.end)), allDay: e.allDay, cal: e.cal.id, title: e.title, loc: e.loc || '', notes: e.desc || '', recurring: e.recurring };
+      renderSheet(); return; }
+    case 'ev-del': { const sh = S.sheet; if (!sh) return; if (!sh.confirmDel) { sh.confirmDel = true; renderSheet(); return; } const k = sh.key; S.sheet = null; renderSheet(); if (S.draft && S.draft.evKey === k) clearDraft(); deleteEvent(k); return; }
+    case 'ev-del-cancel': if (S.sheet) { S.sheet.confirmDel = false; renderSheet(); } return;
     case 'draft-open': openDraftEditor(); return;
     case 'cnav': { const a0 = S.calUI.anchor || t; clearDraft(); S.calUI.anchor = S.calUI.view === 'day' ? addDays(a0, Number(b.dataset.dir)) : S.calUI.view === 'week' ? addDays(a0, 7 * Number(b.dataset.dir)) : (Number(b.dataset.dir) > 0 ? nextMonth(a0.slice(0, 7)) : prevMonth(a0.slice(0, 7))) + '-01'; break; }
     case 'c-today': S.calUI.anchor = null; S.calUI.sel = null; S.calUI.gridTop = null; clearDraft(); break;
@@ -1739,6 +1866,7 @@ document.addEventListener('input', ev => {
 document.addEventListener('change', ev => {
   const el = ev.target;
   if (el.id === 'f-ev-allday' && S.sheet && S.sheet.type === 'event') { S.sheet.allDay = el.checked; renderSheet(); return; }
+  if (el.id === 'f-evv-cal' && S.sheet && S.sheet.type === 'evview') { const p = moveEvent(S.sheet.key, el.value); if (p) p.catch(() => {}); return; }
   if (el.id === 'f-ev-cal') { const c = (S.calendars || []).find(x => x.id === el.value), dot = $('#f-ev-dot'); if (c && dot) dot.style.background = c.color; if (S.sheet) S.sheet.cal = el.value; return; }
   if (el.dataset.dayField) {
     const f = el.dataset.dayField, ty = el.dataset.type, d = viewDate();
@@ -1817,6 +1945,20 @@ document.addEventListener('submit', ev => {
       sM = +st.slice(0, 2) * 60 + +st.slice(3, 5); eM = midnight ? 1440 : +en.slice(0, 2) * 60 + +en.slice(3, 5);
     }
     const loc = val('#f-ev-loc').trim(), notes = val('#f-ev-notes').trim();
+    if (sh.edit) {
+      const e = findEv(sh.edit); if (!e) { S.sheet = null; renderSheet(); toast('This event is no longer in your calendar'); return; }
+      const upd = { ...input, calendarId: e.cal.id, eventId: e.id, location: loc, description: notes };
+      const before = { title: e.title, start: e.start, end: e.end, allDay: e.allDay, loc: e.loc, desc: e.desc };
+      Object.assign(e, { title, loc, desc: notes, allDay: !!sh.allDay, start: sh.allDay ? parse(date) : new Date(input.startTime), end: sh.allDay ? parse(addDays(date, 1)) : new Date(input.endTime) });
+      Object.assign(sh, { title, loc, notes, date, start: val('#f-ev-start') || sh.start, end: val('#f-ev-end') || sh.end });
+      if (S.draft && S.draft.evKey === sh.edit) S.draft = null;
+      S.sheet = { type: 'evview', key: sh.edit }; render();
+      const moving = calId !== e.cal.id && !sh.recurring;
+      const run = moving ? moveEvent(sh.edit, calId).then(() => S.mcp.callTool(CAL, 'update_event', { ...upd, calendarId: calId })) : S.mcp.callTool(CAL, 'update_event', upd);
+      run.then(() => { toast('Event updated'); refreshCal(); })
+        .catch(err => { Object.assign(e, before); sh.saving = false; S.sheet = sh; render(); toast(calWriteMsg(err, 'change'), 5500); refreshCal(); });
+      return;
+    }
     if (loc) input.location = loc; if (notes) input.description = notes;
     Object.assign(sh, { title, cal: calId, date, loc, notes, start: val('#f-ev-start') || sh.start, end: val('#f-ev-end') || sh.end });
     S.lastCal = calId;
