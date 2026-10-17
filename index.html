@@ -249,6 +249,66 @@ a.nm{color:inherit;text-decoration:none} a.nm:hover{text-decoration:underline}
 .event.ev-c{display:flex;flex-direction:column;gap:2px;min-width:0}
 .notice{border:1px dashed var(--line);border-radius:12px;padding:12px;font-size:13px;color:var(--ink-2);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
+/* day view: time grid (long-press an empty slot to create an event) */
+.dayv{padding:10px 0 0;gap:0;overflow:hidden}
+.wstrip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;padding:0 8px 8px}
+.wstrip button{border:0;background:none;border-radius:10px;padding:5px 0;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.04em}
+.wstrip button b{font-family:var(--f-display);font-stretch:80%;font-size:17px;font-weight:700;color:var(--ink);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.wstrip button.today b{color:var(--crit-text)}
+.wstrip button[aria-pressed="true"] b{background:var(--ink);color:var(--bg)}
+.wstrip button.today[aria-pressed="true"] b{background:var(--crit);color:#fff}
+.alld{display:flex;gap:6px;align-items:flex-start;padding:6px 10px;border-top:1px solid var(--line-soft)}
+.alld .lb{font-size:10px;font-weight:700;color:var(--muted);width:38px;flex:none;padding-top:3px;letter-spacing:.04em}
+.alld .ls{display:flex;flex-wrap:wrap;gap:4px;min-width:0;flex:1}
+.alld a,.alld span.ae{font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px;background:color-mix(in srgb,var(--c) 22%,var(--surface));border-left:3px solid var(--c);color:var(--ink);text-decoration:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tgrid{position:relative;overflow-y:auto;overscroll-behavior:contain;border-top:1px solid var(--line-soft);height:520px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.tg-in{position:relative;margin-left:48px;margin-right:8px}
+.tg-h{position:absolute;left:0;right:0;border-top:1px solid var(--line-soft);pointer-events:none}
+.tg-h span{position:absolute;left:-46px;top:-8px;width:38px;text-align:right;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tg-h.half{border-top-style:dashed;opacity:.55}
+.tev{position:absolute;border-radius:6px;padding:3px 6px;font-size:12px;line-height:1.25;overflow:hidden;color:var(--ink);text-decoration:none;background:color-mix(in srgb,var(--c) 24%,var(--surface));border-left:3px solid var(--c);box-shadow:0 0 0 1px var(--surface);-webkit-touch-callout:none}
+.tev b{font-weight:650;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tev small{color:var(--ink-2);font-size:11px;font-variant-numeric:tabular-nums}
+.tev.past{opacity:.6}
+.tnow{position:absolute;left:-6px;right:0;height:2px;background:var(--crit);pointer-events:none;z-index:3}
+.tnow::before{content:"";position:absolute;left:-4px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--crit)}
+.tdraft{position:absolute;left:0;right:0;z-index:4;border-radius:8px;border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 22%,transparent);touch-action:none;padding:3px 8px;font-size:12px;font-weight:650;color:var(--accent-text);overflow:visible}
+.tdraft .dt{display:block;padding-left:14px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tdraft.saving{border-style:dashed;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
+.dh{position:absolute;width:44px;height:44px;display:grid;place-items:center;touch-action:none;z-index:5}
+.dh::after{content:"";width:12px;height:12px;border-radius:50%;border:2px solid var(--accent);background:var(--surface)}
+.dh.dh-s{top:-22px;left:-8px}
+.dh.dh-e{bottom:-22px;right:-8px}
+.tdraft.saving .dh{display:none}
+.evpeek{position:fixed;left:0;right:0;margin:0 auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:40;max-width:560px;background:var(--surface);border:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.18);padding:6px 16px 14px;display:flex;flex-direction:column;gap:6px}
+@media (min-width:900px){.evpeek{bottom:16px;border-radius:18px}}
+.evpeek .grab{width:36px;height:4px;border-radius:2px;background:var(--line);margin:2px auto 4px}
+.pk-h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.pk-h .x{margin-left:auto}
+.pk-title{border:0;background:none;text-align:left;padding:4px 0;font-family:var(--f-display);font-stretch:85%;font-size:22px;font-weight:650;color:var(--muted);width:100%}
+.pk-time{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.pk-time svg,.evf-row svg{width:17px;height:17px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.pk-time em,.evf-dur{white-space:nowrap;font-style:normal;font-weight:500;color:var(--muted);font-size:13px}
+.pk-date{font-size:13px;color:var(--ink-2);padding-left:27px}
+.evpeek.mini .pk-more{display:none}
+.sheet-card.evf{gap:0;padding-top:10px}
+@media (max-width:639px){.sheet-card.evf{height:calc(100dvh - env(safe-area-inset-top,0px) - 10px);max-height:none}}
+.evf .grab{width:36px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 10px}
+.evf-h{display:flex;align-items:center;gap:8px}
+.evf-h .calpick{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 4px 3px 10px;min-width:0;max-width:60%}
+.evf-h .calpick select{border:0;background:none;font-size:14px;font-weight:600;padding:3px 2px;min-width:0;max-width:100%;color:var(--ink-2)}
+.evf-h .end{margin-left:auto;display:flex;gap:8px;align-items:center}
+.evf-title{border:0;background:none;width:100%;font-family:var(--f-display);font-stretch:85%;font-size:26px;font-weight:700;padding:14px 0 10px;outline:none}
+.evf-title::placeholder{color:var(--muted)}
+.evf-sec{border-top:1px solid var(--line-soft);padding:12px 0;display:flex;flex-direction:column;gap:10px}
+.evf-row{display:flex;align-items:center;gap:10px;min-width:0}
+.evf-row .plain{border:0;background:none;padding:6px 0;font-size:16px;min-width:0;outline:none}
+.evf-row input[type=time].plain,.evf-row input[type=date].plain{-webkit-appearance:none;appearance:none;font-weight:600;font-variant-numeric:tabular-nums;min-height:34px}
+.evf-row .grow{flex:1}
+.evf-row textarea.plain{resize:none;min-height:70px;font:inherit;font-size:15px;flex:1}
+.evf-opts{display:flex;gap:6px;padding-left:27px;flex-wrap:wrap}
+
 /* sheet */
 .sheet{position:fixed;inset:0;z-index:50;background:rgba(10,12,18,.45);display:flex;align-items:flex-end;justify-content:center}
 .sheet-card{background:var(--surface);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
@@ -358,7 +418,7 @@ const S = {
   money: { anchor: null },
   goalsUI: { level: 'day', anchor: null },
   review: { level: 'week', anchor: null },
-  calUI: { view: 'month', anchor: null, sel: null },
+  calUI: { view: 'day', anchor: null, sel: null, gridTop: null }, draft: null,
   cal: { day: {}, range: {} }, calendars: null, calListErr: null, calRole: {}, evHidden: new Set(),
   confirm: null, sheet: null, genDone: null, lastToday: todayISO()
 };
@@ -1199,22 +1259,200 @@ function deleteEvent(compound) {
     .then(() => { toast('Event deleted'); refreshCal(); })
     .catch(e => { S.evHidden.delete(compound); toast(calWriteMsg(e, 'delete'), 5000); refreshCal(); scheduleRender(); });
 }
+function evDurLabel(st, en) {
+  if (!st || !en) return '';
+  const a = +st.slice(0, 2) * 60 + +st.slice(3, 5); let b = +en.slice(0, 2) * 60 + +en.slice(3, 5);
+  if (en === '00:00') b = 1440;
+  return b > a ? durTxt(b - a) : '';
+}
 function newEventSheet(date) {
   const now = new Date(), isToday = date === todayISO();
   const h = isToday ? Math.min(now.getHours() + 1, 22) : 18;
   S.sheet = { type: 'event', date, start: `${pad(h)}:00`, end: `${pad(h + 1)}:00`, allDay: false };
+  clearDraft();
   renderSheet(); setTimeout(() => { const f = $('#f-ev-title'); f && f.focus(); }, 30);
 }
+/* ---------- day view: time grid + Notion-style "hold to create" ---------- */
+const HOUR_H = 52, SNAP = 15, MIN_DUR = 15;
+const mm2y = m => m * HOUR_H / 60;
+const m2hm = m => m >= 1440 ? '24:00' : `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+const durTxt = d => d < 60 ? `${d}min` : `${Math.floor(d / 60)}h${d % 60 ? ` ${d % 60}min` : ''}`;
+const ICON_CLOCK = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+function layoutDay(list, d) {
+  const s0 = parse(d), e0 = parse(addDays(d, 1));
+  const items = list.filter(e => !e.allDay).map(e => {
+    const s = Math.max(0, (Math.max(+e.start, +s0) - s0) / 6e4), en = Math.min(1440, (Math.min(+e.end, +e0) - s0) / 6e4);
+    return { e, s, en: Math.max(en, s + 15) };
+  }).sort((a, b) => a.s - b.s || b.en - a.en);
+  let cluster = [], cols = [], end = -1;
+  const flush = () => { cluster.forEach(x => { x.n = cols.length; }); cluster = []; cols = []; };
+  items.forEach(x => {
+    if (x.s >= end) { flush(); end = -1; }
+    let c = cols.findIndex(ce => ce <= x.s); if (c < 0) { c = cols.length; cols.push(0); }
+    cols[c] = x.en; x.col = c; cluster.push(x); end = Math.max(end, x.en);
+  });
+  flush();
+  return items;
+}
+function draftHTML() {
+  const D = S.draft; if (!D) return '';
+  return `<div class="tdraft ${D.saving ? 'saving' : ''}" id="tdraft" style="top:${mm2y(D.s)}px;height:${mm2y(D.e - D.s)}px"><span class="dt" id="tdraft-t">${D.title ? esc(D.title) + ' · ' : ''}${m2hm(D.s)} – ${m2hm(D.e)}</span><i class="dh dh-s" data-h="top" aria-hidden="true"></i><i class="dh dh-e" data-h="bot" aria-hidden="true"></i></div>`;
+}
+function draftCal() {
+  const cals = (S.calendars || []).filter(x => canWrite(x.id));
+  const id = (S.draft && S.draft.cal) || S.lastCal || ((cals.find(x => /@gmail\.com$/.test(x.id)) || cals[0] || {}).id);
+  return cals.find(x => x.id === id) || cals[0] || null;
+}
+function peekHTML() {
+  const D = S.draft; if (!D || D.saving || (S.sheet && S.sheet.type === 'event')) return '';
+  const cal = draftCal();
+  return `<div class="evpeek" id="evpeek" role="dialog" aria-label="New event">
+    <div class="grab"></div>
+    <div class="pk-h">${cal ? `<i class="dot" style="background:${cal.color}"></i>${esc(cal.name)}` : 'Event'}<button class="x" data-act="draft-cancel" aria-label="Discard event">×</button></div>
+    <button class="pk-title" data-act="draft-open">Title</button>
+    <div class="pk-more"><div class="pk-time">${ICON_CLOCK}<span id="pk-time">${m2hm(D.s)} → ${m2hm(D.e)}</span><em id="pk-dur">${durTxt(D.e - D.s)}</em></div>
+    <div class="pk-date">${esc(fmtShort(D.date))}</div></div>
+  </div>`;
+}
+function updateDraftDOM() {
+  const D = S.draft, el = $('#tdraft'); if (!D || !el) return;
+  el.style.top = mm2y(D.s) + 'px'; el.style.height = mm2y(D.e - D.s) + 'px';
+  const t = $('#tdraft-t'); if (t) t.textContent = `${D.title ? D.title + ' · ' : ''}${m2hm(D.s)} – ${m2hm(D.e)}`;
+  const pt = $('#pk-time'), pd = $('#pk-dur'); if (pt) pt.textContent = `${m2hm(D.s)} → ${m2hm(D.e)}`; if (pd) pd.textContent = durTxt(D.e - D.s);
+}
+function mountDraft() {
+  const col = $('#tg-col'); if (!col) return;
+  const old = $('#tdraft'); if (old) old.remove(); const op = $('#evpeek'); if (op) op.remove();
+  col.insertAdjacentHTML('beforeend', draftHTML());
+  $('#main').insertAdjacentHTML('beforeend', peekHTML());
+}
+function clearDraft() { S.draft = null; const a = $('#tdraft'), b = $('#evpeek'); if (a) a.remove(); if (b) b.remove(); }
+function openDraftEditor() {
+  const D = S.draft; if (!D) return;
+  S.sheet = { type: 'event', date: D.date, start: m2hm(D.s) === '24:00' ? '23:59' : m2hm(D.s), end: D.e >= 1440 ? '00:00' : m2hm(D.e), allDay: false, cal: D.cal, fromDraft: true };
+  const p = $('#evpeek'); if (p) p.remove();
+  renderSheet(); setTimeout(() => { const f = $('#f-ev-title'); f && f.focus(); }, 30);
+}
+function renderDayView(a, st) {
+  const t = todayISO(), mon = mondayOf(a), evs = st.kind === 'ok' ? eventsOn(st.events, a) : [];
+  const strip = [0, 1, 2, 3, 4, 5, 6].map(i => { const d = addDays(mon, i); return `<button data-act="c-day" data-d="${d}" class="${d === t ? 'today' : ''}" aria-pressed="${d === a}" aria-label="${esc(fmtLong(d))}">${parse(d).toLocaleDateString('en-GB', { weekday: 'short' })}<b>${parse(d).getDate()}</b></button>`; }).join('');
+  const allDay = evs.filter(e => e.allDay);
+  const alld = allDay.length ? `<div class="alld"><span class="lb">ALL-DAY</span><div class="ls">${allDay.map(e => e.link ? `<a href="${esc(e.link)}" target="_blank" rel="noopener" style="--c:${e.cal.color}">${esc(e.title)}</a>` : `<span class="ae" style="--c:${e.cal.color}">${esc(e.title)}</span>`).join('')}</div></div>` : '';
+  let lines = '';
+  for (let h = 0; h < 24; h++) lines += `<div class="tg-h" style="top:${h * HOUR_H}px">${h ? `<span>${pad(h)}:00</span>` : ''}</div><div class="tg-h half" style="top:${h * HOUR_H + HOUR_H / 2}px"></div>`;
+  const now = new Date(), nowM = now.getHours() * 60 + now.getMinutes();
+  const blocks = layoutDay(evs, a).map(x => {
+    const e = x.e, h = mm2y(x.en - x.s), w = 100 / x.n;
+    const inner = `<b>${esc(e.title)}</b>${h >= 34 ? `<small>${hm(e.start)}–${hm(e.end)}</small>` : ''}`;
+    const style = `top:${mm2y(x.s)}px;height:${Math.max(h - 2, 16)}px;left:calc(${x.col * w}% + 1px);width:calc(${w}% - 3px);--c:${e.cal.color}`;
+    const cls = `tev ${+e.end < +now ? 'past' : ''}`;
+    return e.link ? `<a class="${cls}" href="${esc(e.link)}" target="_blank" rel="noopener" style="${style}">${inner}</a>` : `<div class="${cls}" style="${style}">${inner}</div>`;
+  }).join('');
+  const D = S.draft && S.draft.date === a ? draftHTML() : '';
+  return `<section class="card dayv"><div class="wstrip">${strip}</div>${alld}
+    <div class="tgrid" id="tgrid" data-d="${a}"><div class="tg-in" id="tg-in" style="height:${24 * HOUR_H}px">${lines}<div id="tg-col" style="position:absolute;inset:0">${blocks}${a === t ? `<div class="tnow" style="top:${mm2y(nowM)}px"></div>` : ''}${D}</div></div></div>
+  </section>${S.draft && S.draft.date === a ? peekHTML() : ''}`;
+}
+function fitGrid() {
+  const g = $('#tgrid'); if (!g) return;
+  const wide = innerWidth >= 900, tabs = $('#tabs').getBoundingClientRect();
+  const bottom = wide ? innerHeight - 16 : tabs.top - 10;
+  g.style.height = Math.max(300, Math.round(bottom - g.getBoundingClientRect().top)) + 'px';
+  if (S.calUI.gridTop == null) { const n = new Date(); S.calUI.gridTop = Math.max(0, mm2y((S.calUI.anchor && S.calUI.anchor !== todayISO() ? 7 * 60 : n.getHours() * 60 + n.getMinutes() - 90))); }
+  g.scrollTop = S.calUI.gridTop;
+}
+document.addEventListener('scroll', ev => { if (ev.target && ev.target.id === 'tgrid') S.calUI.gridTop = ev.target.scrollTop; }, true);
+
+/* Gestures on the grid. Touch: hold ~0.4s on an empty slot to create a 30-min block,
+   keep the finger down to stretch it. Mouse: click or drag on an empty slot.
+   Drag the round handles to move the start or the end, drag the block to move it. */
+let G = null;
+const snapM = m => Math.round(m / SNAP) * SNAP;
+function gridMinutes(clientY) { const r = $('#tg-in').getBoundingClientRect(); return (clientY - r.top) / HOUR_H * 60; }
+function gestApply(clientY) {
+  const D = S.draft; if (!G || !D) return;
+  const m = gridMinutes(clientY);
+  if (G.mode === 'top') D.s = clamp(snapM(m), 0, D.e - MIN_DUR);
+  else if (G.mode === 'bot') D.e = clamp(snapM(m + G.off), D.s + MIN_DUR, 1440);
+  else if (G.mode === 'move') { const dur = D.e - D.s; D.s = clamp(snapM(m - G.off), 0, 1440 - dur); D.e = D.s + dur; }
+  else if (G.mode === 'range') { const a = G.anchor, b = snapM(m); if (b >= a) { D.s = a; D.e = Math.max(a + MIN_DUR, b); } else { D.s = Math.max(0, b); D.e = a; } }
+  updateDraftDOM();
+}
+function edgeLoop() {
+  if (!G || !G.active) return;
+  const g = $('#tgrid'); if (g && G.y != null) {
+    const r = g.getBoundingClientRect(), z = 44;
+    const v = G.y < r.top + z ? -(r.top + z - G.y) / 4 : G.y > r.bottom - z ? (G.y - (r.bottom - z)) / 4 : 0;
+    if (v) { g.scrollTop += clamp(v, -12, 12); gestApply(G.y); }
+  }
+  G.raf = requestAnimationFrame(edgeLoop);
+}
+function gestStart(mode, ev, extra = {}) {
+  G = Object.assign(G || {}, { mode, active: true, id: ev.pointerId, y: ev.clientY }, extra);
+  const p = $('#evpeek'); if (p) p.classList.add('mini');
+  cancelAnimationFrame(G.raf); G.raf = requestAnimationFrame(edgeLoop);
+}
+function newDraftAt(m, date) {
+  const s = clamp(snapM(m - 15), 0, 1440 - 30);
+  S.draft = { date, s, e: s + 30, cal: (draftCal() || {}).id };
+  mountDraft();
+  if (navigator.vibrate) try { navigator.vibrate(8); } catch (e) {}
+}
+document.addEventListener('pointerdown', ev => {
+  const g = ev.target.closest && ev.target.closest('#tgrid'); if (!g || !S.mcp || !S.calendars) return;
+  if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+  const date = g.dataset.d, h = ev.target.closest('.dh'), dr = ev.target.closest('#tdraft');
+  if (S.draft && S.draft.saving) return;
+  if (h && S.draft) { ev.preventDefault(); gestStart(h.dataset.h, ev, { off: h.dataset.h === 'bot' ? S.draft.e - gridMinutes(ev.clientY) : 0 }); return; }
+  if (dr && S.draft) { ev.preventDefault(); gestStart('move', ev, { off: gridMinutes(ev.clientY) - S.draft.s }); return; }
+  if (ev.target.closest('.tev')) return;
+  const m = gridMinutes(ev.clientY);
+  G = { mode: 'press', active: false, id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, y: ev.clientY, m, date, mouse: ev.pointerType === 'mouse', hadDraft: !!S.draft };
+  if (!G.mouse) G.timer = setTimeout(() => {
+    if (!G || G.mode !== 'press') return;
+    newDraftAt(G.m, date);
+    gestStart('bot', { pointerId: G.id, clientY: G.y }, { off: S.draft.e - gridMinutes(G.y) });
+  }, 420);
+});
+document.addEventListener('pointermove', ev => {
+  if (!G || ev.pointerId !== G.id) return;
+  G.y = ev.clientY;
+  if (G.mode === 'press') {
+    const moved = Math.hypot(ev.clientX - G.x0, ev.clientY - G.y0);
+    if (G.mouse && moved > 5) { const a = clamp(snapM(G.m), 0, 1440 - MIN_DUR); S.draft = { date: G.date, s: a, e: a + MIN_DUR, cal: (draftCal() || {}).id }; mountDraft(); gestStart('range', ev, { anchor: a }); gestApply(ev.clientY); }
+    else if (!G.mouse && moved > 8) { clearTimeout(G.timer); G = null; }
+    return;
+  }
+  if (G.active) { ev.preventDefault(); gestApply(ev.clientY); }
+}, { passive: false });
+function gestEnd(ev) {
+  if (!G || (ev && ev.pointerId !== G.id)) return;
+  clearTimeout(G.timer); cancelAnimationFrame(G.raf);
+  const g = G; G = null;
+  if (g.mode === 'press' && ev && ev.type === 'pointerup') {
+    if (g.hadDraft) clearDraft();
+    else if (g.mouse) newDraftAt(g.m, g.date);
+    return;
+  }
+  const p = $('#evpeek'); if (p) p.classList.remove('mini');
+}
+document.addEventListener('pointerup', gestEnd); document.addEventListener('pointercancel', gestEnd);
+document.addEventListener('touchmove', ev => { if (G && G.active) ev.preventDefault(); }, { passive: false });
+document.addEventListener('contextmenu', ev => { if (ev.target.closest && ev.target.closest('#tgrid')) ev.preventDefault(); });
+
 function calRange() {
   const v = S.calUI.view, a = S.calUI.anchor || todayISO();
+  if (v === 'day') return { start: a, end: addDays(a, 1), label: parse(a).toLocaleDateString('en-GB', { month: 'long' }), sub: parse(a).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) };
   if (v === 'week') { const s = mondayOf(a); return { start: s, end: addDays(s, 7), label: `Week ${weekNo(s)}`, sub: `${fmtDM(s)} – ${fmtDM(addDays(s, 6))}` }; }
   const mk = a.slice(0, 7), s = mondayOf(mk + '-01'); let e = addDays(monthEnd(mk), 1); while ((parse(e).getDay() + 6) % 7 !== 0) e = addDays(e, 1);
   return { start: s, end: e, label: fmtMonth(mk), mk };
 }
 function renderCalendar() {
   const r = calRange(), t = todayISO(), sel = S.calUI.sel || t, st = calState('range'), c = cfg();
-  const head = `<div class="pagehead"><div class="grow"><div class="eyebrow">Calendar</div><h1 class="display">${esc(r.label)}</h1>${r.sub ? `<div class="sub">${esc(r.sub)}</div>` : ''}</div>${seg('cview', [['month', 'Month'], ['week', 'Week']], S.calUI.view)}</div>
-  <div class="row" style="margin-bottom:14px">${pnav('cnav', S.calUI.view === 'week' ? `W${weekNo(r.start)}` : fmtMonShort(r.mk) + ' ' + r.mk.slice(0, 4), '', false)}<button class="btn small" data-act="c-today">Today</button>${S.mcp && S.calendars ? `<button class="btn small primary" data-act="ev-new" data-d="${S.calUI.sel || t}">+ Event</button>` : ''}</div><div style="margin-bottom:14px">${calLegend()}</div>`;
+  const isDay = S.calUI.view === 'day';
+  const navLbl = isDay ? fmtDM(r.start) : S.calUI.view === 'week' ? `W${weekNo(r.start)}` : fmtMonShort(r.mk) + ' ' + r.mk.slice(0, 4);
+  const head = `<div class="pagehead" ${isDay ? 'style="margin-bottom:10px"' : ''}><div class="grow"><div class="eyebrow">Calendar</div><h1 class="display">${esc(r.label)}</h1>${r.sub ? `<div class="sub">${esc(r.sub)}</div>` : ''}</div>${seg('cview', [['day', 'Day'], ['week', 'Week'], ['month', 'Month']], S.calUI.view)}</div>
+  <div class="row" style="margin-bottom:${isDay ? 10 : 14}px">${pnav('cnav', navLbl, '', false)}<button class="btn small" data-act="c-today">Today</button>${S.mcp && S.calendars ? `<button class="btn small primary" data-act="ev-new" data-d="${isDay ? r.start : S.calUI.sel || t}">+ Event</button>` : ''}</div>${isDay ? '' : `<div style="margin-bottom:14px">${calLegend()}</div>`}`;
   let status = '';
   if (st.kind === 'nomcp') status = `<div class="notice">Sign in with Google to see your events.</div>`;
   else if (st.kind === 'err') status = calErrHTML('range', st.err);
@@ -1223,6 +1461,7 @@ function renderCalendar() {
   else status = calStatusExtra('range', st);
   const evs = st.kind === 'ok' ? st.events : [], hasEv = st.kind === 'ok';
   const marks = d => { if (d > t || d < c.start) return ''; const st = dayHabitStat(d), wo = (day(d).workouts || []).length; return `<span style="display:flex;gap:4px;align-items:center;margin-top:auto">${st.pct != null ? `<i title="Habits ${Math.round(st.pct * 100)}%" style="width:16px;height:4px;border-radius:2px;background:${heatColor(st.pct)};display:inline-block"></i>` : ''}${wo ? `<i class="dot" style="width:6px;height:6px;background:var(--ink-2)" title="${wo} training"></i>` : ''}</span>`; };
+  if (isDay) return head + (st.kind === 'ok' ? status : status ? `<div style="margin-bottom:10px">${status}</div>` : '') + renderDayView(r.start, st);
   if (S.calUI.view === 'week') {
     const days = []; for (let i = 0; i < 7; i++) days.push(addDays(r.start, i));
     return head + status + `<div class="grid">${days.map(d => { const ev = eventsOn(evs, d), st = d <= t && d >= c.start ? dayHabitStat(d) : null, wo = day(d).workouts || []; return `<section class="card" style="gap:8px"><div class="card-h"><h2 style="${d === t ? 'color:var(--accent-text)' : ''}">${esc(fmtLong(d))}</h2><div class="meta">${st && st.total ? `Habits ${st.done}/${st.total}` : ''}${wo.length ? ` · ${wo.map(w => wType(w.type).name).join(', ')}` : ''}</div></div>${hasEv ? (ev.length ? evList(ev) : '<div class="empty">No events.</div>') : ''}</section>`; }).join('')}</div>`;
@@ -1240,7 +1479,7 @@ function renderCalendar() {
 /* ---------- sheets ---------- */
 function renderSheet() {
   const el = $('#sheet'), keep = {};
-  el.querySelectorAll('input[id], select[id]').forEach(x => { if (x.dataset.setting || x.dataset.habitName || x.type === 'checkbox') return; if (x.value !== x.defaultValue) keep[x.id] = x.value; });
+  el.querySelectorAll('input[id], select[id], textarea[id]').forEach(x => { if (x.dataset.setting || x.dataset.habitName || x.type === 'checkbox') return; if (x.value !== x.defaultValue) keep[x.id] = x.value; });
   renderSheetInner();
   for (const id in keep) { const x = document.getElementById(id); if (x && el.contains(x)) x.value = keep[id]; }
 }
@@ -1253,19 +1492,26 @@ function renderSheetInner() {
   if (sh.type === 'event') {
     const cals = (S.calendars || []).filter(x => canWrite(x.id));
     const def = sh.cal || S.lastCal || ((cals.find(x => /@gmail\.com$/.test(x.id)) || cals[0] || {}).id);
-    el.innerHTML = `<div class="sheet-card" role="dialog" aria-modal="true" aria-label="Add event">
-      <div class="sheet-h"><h2 style="font-size:20px">Add event</h2>${close}</div>
-      ${cals.length ? `<form class="stack" data-form="event">
-        <div class="field"><label for="f-ev-title">Title</label><input class="inp" id="f-ev-title" required maxlength="200" autocomplete="off" placeholder="e.g. Gym, legs"></div>
-        <div class="field"><label for="f-ev-cal">Calendar</label><select class="inp" id="f-ev-cal">${cals.map(x => `<option value="${esc(x.id)}" ${x.id === def ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>
-        <div class="fields">
-          <div class="field"><label for="f-ev-date">Date</label><input class="inp" id="f-ev-date" type="date" value="${sh.date}" required></div>
-          ${sh.allDay ? '' : `<div class="field"><label for="f-ev-start">Starts</label><input class="inp" id="f-ev-start" type="time" value="${sh.start}" required></div><div class="field"><label for="f-ev-end">Ends</label><input class="inp" id="f-ev-end" type="time" value="${sh.end}" required></div>`}
+    const dcal = cals.find(x => x.id === def) || cals[0];
+    const dur = evDurLabel(sh.start, sh.end);
+    el.innerHTML = `<div class="sheet-card evf" role="dialog" aria-modal="true" aria-label="New event">
+      <div class="grab"></div>
+      ${cals.length ? `<form data-form="event" style="display:flex;flex-direction:column;min-height:0">
+        <div class="evf-h">
+          <label class="calpick"><i class="dot" id="f-ev-dot" style="background:${dcal ? dcal.color : 'var(--accent)'}"></i><select id="f-ev-cal" aria-label="Calendar">${cals.map(x => `<option value="${esc(x.id)}" ${x.id === def ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
+          <div class="end"><button class="btn small primary" type="submit" id="f-ev-done" ${(sh.title || '').trim() ? '' : 'disabled'}>Done</button>${close}</div>
         </div>
-        <label class="row" style="gap:8px;font-weight:600;font-size:14px" for="f-ev-allday"><input type="checkbox" id="f-ev-allday" ${sh.allDay ? 'checked' : ''}> All-day event</label>
-        <div class="field"><label for="f-ev-loc">Location (optional)</label><input class="inp" id="f-ev-loc" maxlength="200" autocomplete="off"></div>
-        <div><button class="btn primary" type="submit" ${sh.saving ? 'disabled' : ''}>${sh.saving ? 'Saving…' : 'Add to calendar'}</button></div>
-      </form>` : '<div class="notice">None of your calendars accept new events from here.</div>'}</div>`;
+        <input class="evf-title" id="f-ev-title" required maxlength="200" autocomplete="off" placeholder="Title" aria-label="Title" value="${esc(sh.title || '')}" enterkeyhint="done">
+        <div class="evf-sec">
+          ${sh.allDay ? '' : `<div class="evf-row">${ICON_CLOCK}<input class="plain" id="f-ev-start" type="time" value="${sh.start}" required aria-label="Starts"><span style="color:var(--muted)">→</span><input class="plain" id="f-ev-end" type="time" value="${sh.end}" required aria-label="Ends"><span class="evf-dur" id="f-ev-dur">${dur}</span></div>`}
+          <div class="evf-row"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><input class="plain grow" id="f-ev-date" type="date" value="${sh.date}" required aria-label="Date"></div>
+          <div class="evf-opts"><label class="chip" for="f-ev-allday" style="cursor:pointer"><input type="checkbox" id="f-ev-allday" ${sh.allDay ? 'checked' : ''} style="margin:0"> All-day</label></div>
+        </div>
+        <div class="evf-sec">
+          <div class="evf-row"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><input class="plain grow" id="f-ev-loc" maxlength="200" autocomplete="off" placeholder="Location" value="${esc(sh.loc || '')}"></div>
+          <div class="evf-row" style="align-items:flex-start"><svg viewBox="0 0 24 24" style="margin-top:8px"><path d="M4 6h16M4 12h16M4 18h10"/></svg><textarea class="plain" id="f-ev-notes" maxlength="4000" placeholder="Notes">${esc(sh.notes || '')}</textarea></div>
+        </div>
+      </form>` : `<div class="sheet-h"><h2 style="font-size:20px">New event</h2>${close}</div><div class="notice">None of your calendars accept new events from here.</div>`}</div>`;
     return;
   }
   if (sh.type === 'tx') {
@@ -1373,10 +1619,11 @@ function render() {
   restoreUI(ui);
   drawCharts();
   window.scrollTo(0, y);
+  fitGrid();
 }
 let toastT;
 function toast(msg, ms = 2200) { const el = $('#toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, ms); }
-function go(tab) { S.tab = tab; S.confirm = null; render(); window.scrollTo(0, 0); }
+function go(tab) { S.tab = tab; S.confirm = null; if (tab !== 'calendar') S.draft = null; render(); window.scrollTo(0, 0); fitGrid(); }
 
 /* ---------- actions ---------- */
 function toggleGoal(id) { const g = S.goals.find(x => x.id === id); if (!g) return; S.goals = S.goals.map(x => x.id === id ? { ...x, done: !g.done } : x); mergeDoc('goals', id, { done: !g.done, doneAt: !g.done ? Date.now() : null }); }
@@ -1395,7 +1642,7 @@ function doDelete(kind, id) {
 }
 document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-act]');
-  if (!b) { if (S.confirm) { S.confirm = null; render(); } if (ev.target.id === 'sheet') { S.sheet = null; renderSheet(); } return; }
+  if (!b) { if (S.confirm) { S.confirm = null; render(); } if (ev.target.id === 'sheet') { const fd = S.sheet && S.sheet.fromDraft; S.sheet = null; renderSheet(); if (fd) clearDraft(); } return; }
   const a = b.dataset.act, v = b.dataset.v, id = b.dataset.id, t = todayISO();
   if (a !== 'del' && S.confirm) S.confirm = null;
   switch (a) {
@@ -1411,7 +1658,7 @@ document.addEventListener('click', ev => {
     case 'tx-new': S.sheet = { type: 'tx', kind: b.dataset.kind, date: S.tab === 'today' ? viewDate() : (S.tab === 'money' && S.money.anchor && S.money.anchor.slice(0, 7) < t.slice(0, 7) ? monthEnd(S.money.anchor.slice(0, 7)) : t) }; renderSheet(); setTimeout(() => { const f = $('#f-tx-amt'); f && f.focus(); }, 30); return;
     case 'tx-kind': S.sheet.kind = v; S.sheet.cat = null; renderSheet(); return;
     case 'tx-cat': S.sheet.cat = v; document.querySelectorAll('[data-act="tx-cat"]').forEach(x => { const on = x.dataset.v === v; x.setAttribute('aria-pressed', on); x.style.cssText = on ? 'background:var(--accent);color:var(--accent-ink);border-color:var(--accent)' : ''; }); return;
-    case 'sheet-close': S.sheet = null; renderSheet(); if (pendingRender) render(); return;
+    case 'sheet-close': { const fd = S.sheet && S.sheet.fromDraft; S.sheet = null; renderSheet(); if (fd) clearDraft(); if (pendingRender) render(); return; }
     case 'open-settings': S.sheet = { type: 'settings' }; renderSheet(); return;
     case 'hrange': S.health.range = Number(v); break;
     case 'mon-nav': { const mk = (S.money.anchor || t).slice(0, 7); const nm = Number(b.dataset.dir) > 0 ? nextMonth(mk) : prevMonth(mk); S.money.anchor = nm >= t.slice(0, 7) ? null : nm + '-01'; break; }
@@ -1424,9 +1671,12 @@ document.addEventListener('click', ev => {
     case 'open-day': S.review = { level: 'day', anchor: b.dataset.d }; go('review'); return;
     case 'open-month': S.review = { level: 'month', anchor: b.dataset.m + '-01' }; go('review'); return;
     case 'edit-day': S.date = b.dataset.d >= t ? null : b.dataset.d; go('today'); return;
-    case 'cview': S.calUI.view = v; break;
-    case 'cnav': { const a0 = S.calUI.anchor || t; S.calUI.anchor = S.calUI.view === 'week' ? addDays(a0, 7 * Number(b.dataset.dir)) : (Number(b.dataset.dir) > 0 ? nextMonth(a0.slice(0, 7)) : prevMonth(a0.slice(0, 7))) + '-01'; break; }
-    case 'c-today': S.calUI.anchor = null; S.calUI.sel = null; break;
+    case 'cview': if (v === 'day' && S.calUI.view !== 'day') { const sd = S.calUI.sel || S.calUI.anchor; if (sd) S.calUI.anchor = sd; } S.calUI.view = v; clearDraft(); break;
+    case 'c-day': S.calUI.anchor = b.dataset.d === t ? null : b.dataset.d; S.calUI.sel = b.dataset.d; clearDraft(); break;
+    case 'draft-cancel': clearDraft(); return;
+    case 'draft-open': openDraftEditor(); return;
+    case 'cnav': { const a0 = S.calUI.anchor || t; clearDraft(); S.calUI.anchor = S.calUI.view === 'day' ? addDays(a0, Number(b.dataset.dir)) : S.calUI.view === 'week' ? addDays(a0, 7 * Number(b.dataset.dir)) : (Number(b.dataset.dir) > 0 ? nextMonth(a0.slice(0, 7)) : prevMonth(a0.slice(0, 7))) + '-01'; break; }
+    case 'c-today': S.calUI.anchor = null; S.calUI.sel = null; S.calUI.gridTop = null; clearDraft(); break;
     case 'c-sel': S.calUI.sel = b.dataset.d; break;
     case 'cal-retry': calRetry(b.dataset.slot); return;
     case 'ev-new': if (!S.mcp) return; newEventSheet(b.dataset.d || todayISO()); return;
@@ -1440,16 +1690,22 @@ document.addEventListener('click', ev => {
   }
   render();
 });
-document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && S.sheet) { S.sheet = null; renderSheet(); } });
+document.addEventListener('keydown', ev => { if (ev.key !== 'Escape') return; if (S.sheet) { const fd = S.sheet.fromDraft; S.sheet = null; renderSheet(); if (fd) clearDraft(); } else if (S.draft) clearDraft(); });
 document.addEventListener('focusout', () => { setTimeout(() => { if (pendingRender && !focusedInput() && !ptrDown) render(); }, 0); });
 document.addEventListener('pointerdown', () => { ptrDown = true; }, true);
 const ptrEnd = () => { ptrDown = false; setTimeout(() => { if (pendingRender && !focusedInput() && !ptrDown) render(); }, 80); };
 document.addEventListener('pointerup', ptrEnd, true); document.addEventListener('pointercancel', ptrEnd, true);
-window.addEventListener('resize', (() => { let tm; return () => { clearTimeout(tm); tm = setTimeout(drawCharts, 150); }; })());
+window.addEventListener('resize', (() => { let tm; return () => { clearTimeout(tm); tm = setTimeout(() => { drawCharts(); fitGrid(); }, 150); }; })());
 
+document.addEventListener('input', ev => {
+  const el = ev.target; if (!S.sheet || S.sheet.type !== 'event') return;
+  if (el.id === 'f-ev-title') { const d = $('#f-ev-done'); if (d) d.disabled = !el.value.trim(); }
+  if (el.id === 'f-ev-start' || el.id === 'f-ev-end') { const o = $('#f-ev-dur'), v = q => ($(q) || {}).value || ''; if (o) o.textContent = evDurLabel(v('#f-ev-start'), v('#f-ev-end')); }
+});
 document.addEventListener('change', ev => {
   const el = ev.target;
   if (el.id === 'f-ev-allday' && S.sheet && S.sheet.type === 'event') { S.sheet.allDay = el.checked; renderSheet(); return; }
+  if (el.id === 'f-ev-cal') { const c = (S.calendars || []).find(x => x.id === el.value), dot = $('#f-ev-dot'); if (c && dot) dot.style.background = c.color; if (S.sheet) S.sheet.cal = el.value; return; }
   if (el.dataset.dayField) {
     const f = el.dataset.dayField, ty = el.dataset.type, d = viewDate();
     let v = el.value;
@@ -1514,20 +1770,38 @@ document.addEventListener('submit', ev => {
   else if (k === 'event') {
     const sh = S.sheet; if (!sh || sh.saving || !S.mcp) return;
     const title = val('#f-ev-title').trim(), calId = val('#f-ev-cal'), date = val('#f-ev-date');
-    if (!title || !date) return; if (!calId) { toast('Choose a calendar'); return; }
-    let input;
+    if (!title) { const f = $('#f-ev-title'); f && f.focus(); return; }
+    if (!date) return; if (!calId) { toast('Choose a calendar'); return; }
+    let input, sM = null, eM = null;
     if (sh.allDay) input = { calendarId: calId, summary: title, allDay: true, startTime: `${date}T00:00:00`, endTime: `${addDays(date, 1)}T00:00:00` };
     else {
       const st = val('#f-ev-start'), en = val('#f-ev-end');
       if (!st || !en) { toast('Set a start and end time'); return; }
-      if (en <= st) { toast('The end time must be after the start time'); return; }
-      input = { calendarId: calId, summary: title, startTime: `${date}T${st}:00`, endTime: `${date}T${en}:00` };
+      const midnight = en === '00:00' && st !== '00:00';
+      if (!midnight && en <= st) { toast('The end time must be after the start time'); return; }
+      input = { calendarId: calId, summary: title, startTime: `${date}T${st}:00`, endTime: `${midnight ? addDays(date, 1) : date}T${en}:00` };
+      sM = +st.slice(0, 2) * 60 + +st.slice(3, 5); eM = midnight ? 1440 : +en.slice(0, 2) * 60 + +en.slice(3, 5);
     }
-    const loc = val('#f-ev-loc').trim(); if (loc) input.location = loc;
-    S.lastCal = calId; sh.saving = true; renderSheet();
+    const loc = val('#f-ev-loc').trim(), notes = val('#f-ev-notes').trim();
+    if (loc) input.location = loc; if (notes) input.description = notes;
+    Object.assign(sh, { title, cal: calId, date, loc, notes, start: val('#f-ev-start') || sh.start, end: val('#f-ev-end') || sh.end });
+    S.lastCal = calId;
+    // Close the editor right away and keep a placeholder block on the grid until Google confirms.
+    S.sheet = null; renderSheet();
+    if (sM != null) S.draft = { date, s: sM, e: eM, cal: calId, title, saving: true }; else S.draft = null;
+    render();
     S.mcp.callTool(CAL, 'create_event', input)
-      .then(() => { if (S.sheet === sh) S.sheet = null; renderSheet(); toast('Event added'); refreshCal(); })
-      .catch(e => { sh.saving = false; if (S.sheet === sh) renderSheet(); toast(calWriteMsg(e, 'add'), 5500); const c = e && e.code; if (c === 'server_unavailable' || c === 'upstream_error') refreshCal(); });
+      .then(r => {
+        const cal = (S.calendars || []).find(x => x.id === calId);
+        if (cal && r && r.payload && r.payload.id) ['day', 'range'].forEach(k2 => { const C = S.cal[k2]; if (C.byCal && C.byCal[calId]) C.byCal[calId] = [...C.byCal[calId], ...normEvents({ events: [r.payload] }, cal)]; });
+        if (S.draft && S.draft.saving) S.draft = null;
+        toast('Event added'); scheduleRender(); refreshCal();
+      })
+      .catch(e => {
+        if (S.draft && S.draft.saving) S.draft = sh.fromDraft && sM != null ? { date, s: sM, e: eM, cal: calId } : null;
+        sh.saving = false; S.sheet = sh; render();
+        toast(calWriteMsg(e, 'add'), 5500); const c = e && e.code; if (c === 'server_unavailable' || c === 'upstream_error') refreshCal();
+      });
   }
   else if (k === 'sav-new') {
     const name = val('#f-sv-name').trim(), a = num(val('#f-sv-target')); if (!name || !amountOk(a, 'Enter a target amount')) return;

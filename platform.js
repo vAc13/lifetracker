@@ -329,6 +329,7 @@ async function calTool(tool, input) {
   if (tool === 'create_event') {
     const body = { summary: input.summary };
     if (input.location) body.location = input.location;
+    if (input.description) body.description = input.description;
     if (input.allDay) { body.start = { date: input.startTime.slice(0, 10) }; body.end = { date: input.endTime.slice(0, 10) }; }
     else { body.start = { dateTime: input.startTime, timeZone: tz() }; body.end = { dateTime: input.endTime, timeZone: tz() }; }
     return gfetch(`${CAL_API}/calendars/${enc(input.calendarId)}/events`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
