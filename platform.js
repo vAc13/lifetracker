@@ -318,7 +318,7 @@ const localToISO = s => new Date(s).toISOString();
 const tz = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return 'Europe/Warsaw'; } };
 async function calTool(tool, input) {
   if (tool === 'list_calendars') {
-    const r = await gfetch(`${CAL_API}/users/me/calendarList?maxResults=250`);
+    const r = await gfetch(`${CAL_API}/users/me/calendarList?maxResults=250&showHidden=true`);
     return { calendars: r.items || [] };
   }
   if (tool === 'list_events') {
