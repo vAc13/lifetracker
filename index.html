@@ -1426,16 +1426,35 @@ function renderDayView(a, st) {
     <div class="tgrid" id="tgrid" data-d="${a}"><div class="tg-in" id="tg-in" style="height:${24 * HOUR_H}px">${lines}<div id="tg-col" style="position:absolute;inset:0">${blocks}${a === t ? `<div class="tnow" style="top:${mm2y(nowM)}px"></div>` : ''}${D}</div></div><div id="tg-pad" style="height:0"></div></div>
   </section>${S.draft && S.draft.date === a ? peekHTML() : ''}`;
 }
+/* Scroll position that puts the first timed event of `date` at the top (a little room above it).
+   undefined = events for that day are still loading; days without events open at 07:00. */
+function firstEventTop(date) {
+  const st = calState('range'), C = S.cal.range;
+  if (st.kind === 'loading' || (st.kind === 'ok' && (C.start !== date || (C.cals || []).some(c => !C.byCal[c.id] && !C.errs[c.id])))) return undefined;
+  const evs = st.kind === 'ok' ? eventsOn(st.events, date).filter(e => !e.allDay) : [];
+  if (!evs.length) return mm2y(7 * 60);
+  const first = Math.min(...evs.map(e => Math.max(0, minsOf(e.start, date))));
+  return Math.max(0, mm2y(first) - 14);
+}
 function fitGrid() {
   const g = $('#tgrid'); if (!g) return;
   const wide = innerWidth >= 900, tabs = $('#tabs').getBoundingClientRect();
   const bottom = wide ? innerHeight - 12 : tabs.top - 8;
   g.style.height = Math.max(300, Math.round(bottom - g.getBoundingClientRect().top)) + 'px';
+  if (S.calUI.jump) {
+    // Switched to another day: start the view at that day's first event (once its events have loaded).
+    const r = firstEventTop(g.dataset.d);
+    if (r === undefined) { g.scrollTop = mm2y(7 * 60); syncPeekSpace(); return; }
+    S.calUI.jump = false; S.calUI.gridTop = r;
+  }
   if (S.calUI.gridTop == null) { const n = new Date(); S.calUI.gridTop = Math.max(0, mm2y((S.calUI.anchor && S.calUI.anchor !== todayISO() ? 7 * 60 : n.getHours() * 60 + n.getMinutes() - 90))); }
   g.scrollTop = S.calUI.gridTop;
   syncPeekSpace(); if (S.draft) g.scrollTop = S.calUI.gridTop;
 }
-document.addEventListener('scroll', ev => { if (ev.target && ev.target.id === 'tgrid') S.calUI.gridTop = ev.target.scrollTop; }, true);
+document.addEventListener('scroll', ev => { if (ev.target && ev.target.id === 'tgrid' && !S.calUI.jump) S.calUI.gridTop = ev.target.scrollTop; }, true);
+// If you start scrolling yourself before the day's events arrive, don't jump afterwards.
+document.addEventListener('touchstart', ev => { if (S.calUI.jump && ev.target.closest && ev.target.closest('#tgrid')) { S.calUI.jump = false; } }, { passive: true });
+document.addEventListener('wheel', ev => { if (S.calUI.jump && ev.target.closest && ev.target.closest('#tgrid')) { S.calUI.jump = false; } }, { passive: true });
 
 /* Gestures on the grid. Touch: hold ~0.4s on an empty slot to create a 30-min block,
    keep the finger down to stretch it. Mouse: click or drag on an empty slot.
@@ -1843,7 +1862,7 @@ document.addEventListener('click', ev => {
     case 'open-month': S.review = { level: 'month', anchor: b.dataset.m + '-01' }; go('review'); return;
     case 'edit-day': S.date = b.dataset.d >= t ? null : b.dataset.d; go('today'); return;
     case 'cview': if (v === 'day' && S.calUI.view !== 'day') { const sd = S.calUI.sel || S.calUI.anchor; if (sd) S.calUI.anchor = sd; } S.calUI.view = v; clearDraft(); break;
-    case 'c-day': S.calUI.anchor = b.dataset.d === t ? null : b.dataset.d; S.calUI.sel = b.dataset.d; clearDraft(); break;
+    case 'c-day': { const cur = S.calUI.anchor || t; S.calUI.anchor = b.dataset.d === t ? null : b.dataset.d; S.calUI.sel = b.dataset.d; if (b.dataset.d !== cur) S.calUI.jump = true; clearDraft(); break; }
     case 'draft-cancel': clearDraft(); return;
     case 'ev-open': { if (Date.now() < (S.noClickUntil || 0)) return; const k = b.dataset.k; if (!findEv(k)) return; if (S.draft && S.draft.evKey) clearDraft(); openEvView(k); return; }
     case 'ev-edit': { const e = findEv(S.sheet && S.sheet.key); if (!e) return; const d0 = iso(e.start), endD = e.allDay ? addDays(iso(e.end), -1) : iso(e.end);
@@ -1852,7 +1871,7 @@ document.addEventListener('click', ev => {
     case 'ev-del': { const sh = S.sheet; if (!sh) return; if (!sh.confirmDel) { sh.confirmDel = true; renderSheet(); return; } const k = sh.key; S.sheet = null; renderSheet(); if (S.draft && S.draft.evKey === k) clearDraft(); deleteEvent(k); return; }
     case 'ev-del-cancel': if (S.sheet) { S.sheet.confirmDel = false; renderSheet(); } return;
     case 'draft-open': openDraftEditor(); return;
-    case 'cnav': { const a0 = S.calUI.anchor || t; clearDraft(); S.calUI.anchor = S.calUI.view === 'day' ? addDays(a0, Number(b.dataset.dir)) : S.calUI.view === 'week' ? addDays(a0, 7 * Number(b.dataset.dir)) : (Number(b.dataset.dir) > 0 ? nextMonth(a0.slice(0, 7)) : prevMonth(a0.slice(0, 7))) + '-01'; break; }
+    case 'cnav': { const a0 = S.calUI.anchor || t; clearDraft(); if (S.calUI.view === 'day') S.calUI.jump = true; S.calUI.anchor = S.calUI.view === 'day' ? addDays(a0, Number(b.dataset.dir)) : S.calUI.view === 'week' ? addDays(a0, 7 * Number(b.dataset.dir)) : (Number(b.dataset.dir) > 0 ? nextMonth(a0.slice(0, 7)) : prevMonth(a0.slice(0, 7))) + '-01'; break; }
     case 'c-today': S.calUI.anchor = null; S.calUI.sel = null; S.calUI.gridTop = null; clearDraft(); break;
     case 'c-sel': S.calUI.sel = b.dataset.d; break;
     case 'cal-retry': calRetry(b.dataset.slot); return;
