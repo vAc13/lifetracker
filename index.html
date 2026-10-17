@@ -281,17 +281,20 @@ a.nm{color:inherit;text-decoration:none} a.nm:hover{text-decoration:underline}
 .dh.dh-s{top:-22px;left:-8px}
 .dh.dh-e{bottom:-22px;right:-8px}
 .tdraft.saving .dh{display:none}
-.evpeek{position:fixed;left:0;right:0;margin:0 auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:40;max-width:560px;background:var(--surface);border:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.18);padding:6px 16px 14px;display:flex;flex-direction:column;gap:6px}
-@media (min-width:900px){.evpeek{bottom:16px;border-radius:18px}}
+.evpeek{position:fixed;left:0;right:0;margin:0 auto;bottom:0;z-index:45;max-width:560px;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.18);padding:4px 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:4px;transform:translateY(0);transition:transform .28s cubic-bezier(.22,.9,.3,1);will-change:transform;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+.evpeek *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.evpeek.in{animation:pkin .32s cubic-bezier(.22,.9,.3,1)}
+@keyframes pkin{from{transform:translateY(105%)}}
+.evpeek.mini{transform:translateY(var(--mh,60px))}
+.evpeek.out{transform:translateY(105%)!important;transition-duration:.22s}
 .evpeek .grab{width:36px;height:4px;border-radius:2px;background:var(--line);margin:2px auto 4px}
 .pk-h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2)}
 .pk-h .x{margin-left:auto}
-.pk-title{border:0;background:none;text-align:left;padding:4px 0;font-family:var(--f-display);font-stretch:85%;font-size:22px;font-weight:650;color:var(--muted);width:100%}
+.pk-title{border:0;background:none;text-align:left;padding:2px 0 6px;-webkit-tap-highlight-color:transparent;font-family:var(--f-display);font-stretch:85%;font-size:22px;font-weight:650;color:var(--muted);width:100%}
 .pk-time{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
 .pk-time svg,.evf-row svg{width:17px;height:17px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .pk-time em,.evf-dur{white-space:nowrap;font-style:normal;font-weight:500;color:var(--muted);font-size:13px}
-.pk-date{font-size:13px;color:var(--ink-2);padding-left:27px}
-.evpeek.mini .pk-more{display:none}
+.pk-date{font-size:13px;font-weight:500;color:var(--ink-2);margin-left:auto;white-space:nowrap}
 .sheet-card.evf{gap:0;padding-top:10px}
 @media (max-width:639px){.sheet-card.evf{height:calc(100dvh - env(safe-area-inset-top,0px) - 10px);max-height:none}}
 .evf .grab{width:36px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 10px}
@@ -1303,15 +1306,14 @@ function draftCal() {
   const id = (S.draft && S.draft.cal) || S.lastCal || ((cals.find(x => /@gmail\.com$/.test(x.id)) || cals[0] || {}).id);
   return cals.find(x => x.id === id) || cals[0] || null;
 }
-function peekHTML() {
+function peekHTML(cls = '') {
   const D = S.draft; if (!D || D.saving || (S.sheet && S.sheet.type === 'event')) return '';
   const cal = draftCal();
-  return `<div class="evpeek" id="evpeek" role="dialog" aria-label="New event">
+  return `<div class="evpeek ${cls}" id="evpeek" role="dialog" aria-label="New event">
     <div class="grab"></div>
     <div class="pk-h">${cal ? `<i class="dot" style="background:${cal.color}"></i>${esc(cal.name)}` : 'Event'}<button class="x" data-act="draft-cancel" aria-label="Discard event">×</button></div>
     <button class="pk-title" data-act="draft-open">Title</button>
-    <div class="pk-more"><div class="pk-time">${ICON_CLOCK}<span id="pk-time">${m2hm(D.s)} → ${m2hm(D.e)}</span><em id="pk-dur">${durTxt(D.e - D.s)}</em></div>
-    <div class="pk-date">${esc(fmtShort(D.date))}</div></div>
+    <div class="pk-more"><div class="pk-time">${ICON_CLOCK}<span id="pk-time">${m2hm(D.s)} → ${m2hm(D.e)}</span><em id="pk-dur">${durTxt(D.e - D.s)}</em><span class="pk-date">${esc(fmtShort(D.date))}</span></div></div>
   </div>`;
 }
 function updateDraftDOM() {
@@ -1320,17 +1322,47 @@ function updateDraftDOM() {
   const t = $('#tdraft-t'); if (t) t.textContent = `${D.title ? D.title + ' · ' : ''}${m2hm(D.s)} – ${m2hm(D.e)}`;
   const pt = $('#pk-time'), pd = $('#pk-dur'); if (pt) pt.textContent = `${m2hm(D.s)} → ${m2hm(D.e)}`; if (pd) pd.textContent = durTxt(D.e - D.s);
 }
-function mountDraft() {
+function mountDraft(mini) {
   const col = $('#tg-col'); if (!col) return;
-  const old = $('#tdraft'); if (old) old.remove(); const op = $('#evpeek'); if (op) op.remove();
+  const old = $('#tdraft'); if (old) old.remove();
   col.insertAdjacentHTML('beforeend', draftHTML());
-  $('#main').insertAdjacentHTML('beforeend', peekHTML());
+  const op = $('#evpeek');
+  if (op && !op.classList.contains('out')) { op.outerHTML = peekHTML(mini ? 'mini' : ''); setMini(!!mini); }
+  else { if (op) op.remove(); $('#main').insertAdjacentHTML('beforeend', peekHTML('in' + (mini ? ' mini' : ''))); setMini(!!mini); const p = $('#evpeek'); if (p) p.addEventListener('animationend', () => p.classList.remove('in'), { once: true }); }
+  syncPeekSpace();
 }
-function clearDraft() { S.draft = null; const a = $('#tdraft'), b = $('#evpeek'); if (a) a.remove(); if (b) b.remove(); }
+/* The bottom panel slides down to a thin "Title" strip while dragging (like Notion) and back up after. */
+function setMini(on) {
+  const p = $('#evpeek'); if (!p) return;
+  const more = $('.pk-more', p); if (more) p.style.setProperty('--mh', (more.offsetHeight + 4) + 'px');
+  p.classList.toggle('mini', on);
+}
+function clearDraft() {
+  S.draft = null; const a = $('#tdraft'), b = $('#evpeek'); if (a) a.remove();
+  if (b) { b.removeAttribute('id'); document.body.appendChild(b); void b.offsetHeight; b.classList.add('out'); setTimeout(() => b.remove(), 260); }
+  syncPeekSpace();
+}
+/* Extra scroll room under the grid so the last hours can be lifted above the panel. */
+function syncPeekSpace() {
+  const g = $('#tgrid'), pad = $('#tg-pad'); if (!g || !pad) return;
+  const p = $('#evpeek'), over = p ? g.getBoundingClientRect().bottom - (innerHeight - p.offsetHeight) : 0;
+  pad.style.height = Math.max(0, Math.round(over) + 8) + 'px';
+}
+/* After creating or adjusting, scroll the grid so the whole block (and both handles) sits above the panel. */
+function ensureDraftVisible() {
+  const g = $('#tgrid'), d = $('#tdraft'), p = $('#evpeek'); if (!g || !d) return;
+  syncPeekSpace();
+  const gr = g.getBoundingClientRect(), dr = d.getBoundingClientRect();
+  const bottom = Math.min(gr.bottom, p ? innerHeight - p.offsetHeight : gr.bottom) - 22, top = gr.top + 22;
+  let delta = 0;
+  if (dr.bottom > bottom) delta = dr.bottom - bottom;
+  if (dr.top - delta < top) delta = dr.top - top;
+  if (Math.abs(delta) > 2) g.scrollBy({ top: delta, behavior: 'smooth' });
+}
 function openDraftEditor() {
   const D = S.draft; if (!D) return;
   S.sheet = { type: 'event', date: D.date, start: m2hm(D.s) === '24:00' ? '23:59' : m2hm(D.s), end: D.e >= 1440 ? '00:00' : m2hm(D.e), allDay: false, cal: D.cal, fromDraft: true };
-  const p = $('#evpeek'); if (p) p.remove();
+  const p = $('#evpeek'); if (p) p.remove(); syncPeekSpace();
   renderSheet(); setTimeout(() => { const f = $('#f-ev-title'); f && f.focus(); }, 30);
 }
 function renderDayView(a, st) {
@@ -1350,7 +1382,7 @@ function renderDayView(a, st) {
   }).join('');
   const D = S.draft && S.draft.date === a ? draftHTML() : '';
   return `<section class="card dayv"><div class="wstrip">${strip}</div>${alld}
-    <div class="tgrid" id="tgrid" data-d="${a}"><div class="tg-in" id="tg-in" style="height:${24 * HOUR_H}px">${lines}<div id="tg-col" style="position:absolute;inset:0">${blocks}${a === t ? `<div class="tnow" style="top:${mm2y(nowM)}px"></div>` : ''}${D}</div></div></div>
+    <div class="tgrid" id="tgrid" data-d="${a}"><div class="tg-in" id="tg-in" style="height:${24 * HOUR_H}px">${lines}<div id="tg-col" style="position:absolute;inset:0">${blocks}${a === t ? `<div class="tnow" style="top:${mm2y(nowM)}px"></div>` : ''}${D}</div></div><div id="tg-pad" style="height:0"></div></div>
   </section>${S.draft && S.draft.date === a ? peekHTML() : ''}`;
 }
 function fitGrid() {
@@ -1360,6 +1392,7 @@ function fitGrid() {
   g.style.height = Math.max(300, Math.round(bottom - g.getBoundingClientRect().top)) + 'px';
   if (S.calUI.gridTop == null) { const n = new Date(); S.calUI.gridTop = Math.max(0, mm2y((S.calUI.anchor && S.calUI.anchor !== todayISO() ? 7 * 60 : n.getHours() * 60 + n.getMinutes() - 90))); }
   g.scrollTop = S.calUI.gridTop;
+  syncPeekSpace(); if (S.draft) g.scrollTop = S.calUI.gridTop;
 }
 document.addEventListener('scroll', ev => { if (ev.target && ev.target.id === 'tgrid') S.calUI.gridTop = ev.target.scrollTop; }, true);
 
@@ -1381,21 +1414,22 @@ function gestApply(clientY) {
 function edgeLoop() {
   if (!G || !G.active) return;
   const g = $('#tgrid'); if (g && G.y != null) {
-    const r = g.getBoundingClientRect(), z = 44;
-    const v = G.y < r.top + z ? -(r.top + z - G.y) / 4 : G.y > r.bottom - z ? (G.y - (r.bottom - z)) / 4 : 0;
+    const r = g.getBoundingClientRect(), z = 44, p = $('#evpeek');
+    const bot = Math.min(r.bottom, p ? p.getBoundingClientRect().top : r.bottom);
+    const v = !G.moved ? 0 : G.y < r.top + z ? -(r.top + z - G.y) / 4 : G.y > bot - z ? (G.y - (bot - z)) / 4 : 0;
     if (v) { g.scrollTop += clamp(v, -12, 12); gestApply(G.y); }
   }
   G.raf = requestAnimationFrame(edgeLoop);
 }
 function gestStart(mode, ev, extra = {}) {
-  G = Object.assign(G || {}, { mode, active: true, id: ev.pointerId, y: ev.clientY }, extra);
-  const p = $('#evpeek'); if (p) p.classList.add('mini');
+  G = Object.assign(G || {}, { mode, active: true, id: ev.pointerId, y: ev.clientY, ys: ev.clientY, moved: false }, extra);
+  setMini(true);
   cancelAnimationFrame(G.raf); G.raf = requestAnimationFrame(edgeLoop);
 }
-function newDraftAt(m, date) {
+function newDraftAt(m, date, mini) {
   const s = clamp(snapM(m - 15), 0, 1440 - 30);
   S.draft = { date, s, e: s + 30, cal: (draftCal() || {}).id };
-  mountDraft();
+  mountDraft(mini);
   if (navigator.vibrate) try { navigator.vibrate(8); } catch (e) {}
 }
 document.addEventListener('pointerdown', ev => {
@@ -1410,7 +1444,7 @@ document.addEventListener('pointerdown', ev => {
   G = { mode: 'press', active: false, id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, y: ev.clientY, m, date, mouse: ev.pointerType === 'mouse', hadDraft: !!S.draft };
   if (!G.mouse) G.timer = setTimeout(() => {
     if (!G || G.mode !== 'press') return;
-    newDraftAt(G.m, date);
+    newDraftAt(G.m, date, true);
     gestStart('bot', { pointerId: G.id, clientY: G.y }, { off: S.draft.e - gridMinutes(G.y) });
   }, 420);
 });
@@ -1419,11 +1453,11 @@ document.addEventListener('pointermove', ev => {
   G.y = ev.clientY;
   if (G.mode === 'press') {
     const moved = Math.hypot(ev.clientX - G.x0, ev.clientY - G.y0);
-    if (G.mouse && moved > 5) { const a = clamp(snapM(G.m), 0, 1440 - MIN_DUR); S.draft = { date: G.date, s: a, e: a + MIN_DUR, cal: (draftCal() || {}).id }; mountDraft(); gestStart('range', ev, { anchor: a }); gestApply(ev.clientY); }
+    if (G.mouse && moved > 5) { const a = clamp(snapM(G.m), 0, 1440 - MIN_DUR); S.draft = { date: G.date, s: a, e: a + MIN_DUR, cal: (draftCal() || {}).id }; mountDraft(true); gestStart('range', ev, { anchor: a }); gestApply(ev.clientY); }
     else if (!G.mouse && moved > 8) { clearTimeout(G.timer); G = null; }
     return;
   }
-  if (G.active) { ev.preventDefault(); gestApply(ev.clientY); }
+  if (G.active) { ev.preventDefault(); if (Math.abs(ev.clientY - G.ys) > 6) G.moved = true; gestApply(ev.clientY); }
 }, { passive: false });
 function gestEnd(ev) {
   if (!G || (ev && ev.pointerId !== G.id)) return;
@@ -1431,10 +1465,10 @@ function gestEnd(ev) {
   const g = G; G = null;
   if (g.mode === 'press' && ev && ev.type === 'pointerup') {
     if (g.hadDraft) clearDraft();
-    else if (g.mouse) newDraftAt(g.m, g.date);
+    else if (g.mouse) { newDraftAt(g.m, g.date); ensureDraftVisible(); }
     return;
   }
-  const p = $('#evpeek'); if (p) p.classList.remove('mini');
+  setMini(false); ensureDraftVisible();
 }
 document.addEventListener('pointerup', gestEnd); document.addEventListener('pointercancel', gestEnd);
 document.addEventListener('touchmove', ev => { if (G && G.active) ev.preventDefault(); }, { passive: false });
