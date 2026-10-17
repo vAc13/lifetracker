@@ -279,7 +279,7 @@ function gate(kind, msg) {
   let el = document.getElementById('lt-gate');
   if (!el) { el = document.createElement('div'); el.id = 'lt-gate'; document.body.appendChild(el); }
   el.style.cssText = 'position:fixed;inset:0;z-index:70;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px 16px';
-  const brand = `<div class="brand" style="margin-bottom:6px"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 13 8 13 11 6 14 18 17 11 21 11"/></svg></span>Lifetracker</div>`;
+  const brand = `<div class="brand" style="margin-bottom:6px"><img class="brand-logo" src="icon-192-v2.png" alt="" width="26" height="26">Lifetracker</div>`;
   let body = '';
   if (kind === 'signin') body = `<h2 style="font-size:22px">Sign in to your tracker</h2><p class="sub" style="margin:0">Your entries are saved in a file on your Google Drive, and your events come from Google Calendar.</p>${authNote ? `<div class="notice">${authNote}</div>` : ''}<div><button class="btn primary" data-lt="signin">Sign in with Google</button></div>`;
   else if (kind === 'loading') body = `<div class="sub">Connecting to Google Drive…</div>`;
