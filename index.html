@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Lifetracker</title>
 <meta name="robots" content="noindex,nofollow">
 <meta name="description" content="Personal tracker for sleep, weight, training, habits, goals and money.">
@@ -30,6 +30,7 @@
 <style>#splash{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#0d0f14;transition:opacity .25s ease}#splash.out{opacity:0;pointer-events:none}#splash img{width:112px;height:112px;border-radius:25px;display:block;background:#fff}@media (prefers-reduced-motion:reduce){#splash{transition:none}}</style>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <script src="platform.js"></script>
+<script>(function(){/* iOS ignores user-scalable=no, so block pinch zoom here; double-tap zoom is off via touch-action. */["gesturestart","gesturechange","gestureend"].forEach(function(n){document.addEventListener(n,function(e){e.preventDefault();},{passive:false});});document.addEventListener("dblclick",function(e){e.preventDefault();},{passive:false});})();</script>
 </head>
 <body>
 <!-- Same logo as the launch image, shown until the tracker has loaded its data. -->
@@ -69,6 +70,9 @@
 }
 *{box-sizing:border-box}
 html,body{background:var(--bg)}
+/* No double-tap or pinch zoom: the app should feel like a native app, not a web page. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body,*{touch-action:manipulation}
 /* iPhone home-screen apps lift the fixed tab bar when the page is shorter than the screen
    (seen on Goals and the calendar Day view). Keep every page at least a hair taller than the screen,
    like the tabs where the bar sits correctly. */
