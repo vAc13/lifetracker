@@ -251,7 +251,9 @@ a.nm{color:inherit;text-decoration:none} a.nm:hover{text-decoration:underline}
 
 /* day view: the page itself does not scroll, only the time grid does */
 html.cal-lock,html.cal-lock body{overflow:hidden;overscroll-behavior:none;height:100%}
-html.cal-lock body{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);bottom:0;width:100%}
+html.cal-lock body{position:fixed;left:0;right:0;top:0;bottom:0;width:100%;padding-top:env(safe-area-inset-top,0px)}
+html.cal-lock .top{position:relative;top:0}
+html.cal-lock .top-in{padding-top:6px;padding-bottom:6px}
 html.cal-lock .main{padding-bottom:0;padding-top:10px}
 .pagehead.compact{margin-bottom:8px;align-items:center}
 .pagehead.compact h1.display{font-size:28px;margin:0}
