@@ -250,9 +250,7 @@ a.nm{color:inherit;text-decoration:none} a.nm:hover{text-decoration:underline}
 .notice{border:1px dashed var(--line);border-radius:12px;padding:12px;font-size:13px;color:var(--ink-2);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
 /* day view: the page itself does not scroll, only the time grid does */
-html.cal-lock,html.cal-lock body{overflow:hidden;overscroll-behavior:none;height:100%}
-html.cal-lock body{position:fixed;left:0;right:0;top:0;bottom:0;width:100%;padding-top:env(safe-area-inset-top,0px)}
-html.cal-lock .top{position:relative;top:0}
+html.cal-lock,html.cal-lock body{overscroll-behavior:none}
 html.cal-lock .top-in{padding-top:6px;padding-bottom:6px}
 html.cal-lock .main{padding-bottom:0;padding-top:10px}
 .pagehead.compact{margin-bottom:8px;align-items:center}
@@ -1576,7 +1574,11 @@ function gestEnd(ev) {
   setMini(false); ensureDraftVisible();
 }
 document.addEventListener('pointerup', gestEnd); document.addEventListener('pointercancel', gestEnd);
-document.addEventListener('touchmove', ev => { if (G && G.active) ev.preventDefault(); }, { passive: false });
+document.addEventListener('touchmove', ev => {
+  if (G && G.active) { ev.preventDefault(); return; }
+  // Day view: the page fits the screen exactly; stop iOS from dragging/bouncing it. Only the grid (and open sheets) scroll.
+  if (document.documentElement.classList.contains('cal-lock') && !(ev.target.closest && ev.target.closest('#tgrid, .sheet-card'))) ev.preventDefault();
+}, { passive: false });
 document.addEventListener('contextmenu', ev => { if (ev.target.closest && ev.target.closest('#tgrid')) ev.preventDefault(); });
 
 function calRange() {
