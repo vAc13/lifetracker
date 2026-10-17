@@ -1,0 +1,1624 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lifetracker</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Personal tracker for sleep, weight, training, habits, goals and money.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lifetracker">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#eef1f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d0f14" media="(prefers-color-scheme: dark)">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<script src="platform.js"></script>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: app shell. Sticky top bar, one content column (max 980px), tab bar fixed to the bottom on phones, left rail on wide screens. */
+:root{
+  --bg:#eef1f5; --surface:#ffffff; --surface-2:#e8ebf1; --line:#d6dbe4; --line-soft:#e6e9ef;
+  --ink:#11141b; --ink-2:#454b58; --muted:#6f7685;
+  --accent:#2340c9; --accent-ink:#ffffff; --accent-soft:#e1e6fa; --accent-text:#1d36aa;
+  --good:#0ca30c; --good-text:#006300; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b; --crit-text:#b02c2c;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948;
+  --shadow:0 1px 2px rgba(17,20,27,.05),0 6px 20px rgba(17,20,27,.04);
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:16px; --r-sm:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d0f14; --surface:#161920; --surface-2:#1f232c; --line:#2c313c; --line-soft:#222630;
+  --ink:#eef0f5; --ink-2:#b9bfcc; --muted:#8a91a1;
+  --accent:#8496ff; --accent-ink:#0d0f14; --accent-soft:#232b4f; --accent-text:#aab7ff;
+  --good-text:#3fc23f; --crit-text:#f08080;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  --shadow:none; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0d0f14; --surface:#161920; --surface-2:#1f232c; --line:#2c313c; --line-soft:#222630;
+  --ink:#eef0f5; --ink-2:#b9bfcc; --muted:#8a91a1;
+  --accent:#8496ff; --accent-ink:#0d0f14; --accent-soft:#232b4f; --accent-text:#aab7ff;
+  --good-text:#3fc23f; --crit-text:#f08080;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  --shadow:none; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
+.top-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.brand{font-family:var(--f-display);font-stretch:75%;font-weight:800;font-size:20px;letter-spacing:.01em;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.brand-mark{width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center}
+.brand-mark svg{width:14px;height:14px;stroke:var(--accent-ink)}
+.savestate{margin-left:auto;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.savestate i{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+.savestate.busy i{background:var(--warn)}
+.icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;width:38px;height:38px;display:grid;place-items:center;flex:none}
+.icon-btn:hover{border-color:var(--ink-2)}
+.icon-btn:disabled{opacity:.35;cursor:default}
+.icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* nav */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+.tab{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:10px;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.02em}
+.tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-current="page"]{color:var(--accent-text);background:var(--accent-soft)}
+.main{max-width:980px;margin:0 auto;overflow-x:clip;padding-inline:16px;padding-block:18px 110px}
+@media (min-width:900px){
+  .tabs{top:calc(59px + env(safe-area-inset-top,0px));bottom:auto;right:auto;width:96px;height:auto;grid-template-columns:1fr;gap:4px;border:0;background:none;padding:14px 10px}
+  .tab{padding:10px 4px;font-size:12px}
+  .main{padding-left:120px;max-width:1180px;padding-bottom:60px}
+}
+
+/* type */
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.display{font-family:var(--f-display);font-stretch:80%;font-weight:750;letter-spacing:-.005em;line-height:1.05;margin:2px 0 0;text-wrap:balance}
+h1.display{font-size:clamp(28px,6vw,40px)}
+h2{font-family:var(--f-display);font-stretch:85%;font-weight:700;font-size:17px;margin:0;letter-spacing:.005em}
+.sub{color:var(--muted);font-size:13px}
+.big{font-family:var(--f-display);font-stretch:75%;font-weight:750;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-family:var(--f-body);font-size:13px;font-weight:500;color:var(--muted);margin-left:3px;font-stretch:100%}
+
+/* page head */
+.pagehead{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.pagehead .grow{flex:1;min-width:0}
+.pernav{display:flex;align-items:center;gap:8px}
+.pernav .lbl{font-weight:600;min-width:0;text-align:center}
+
+/* cards */
+.grid{display:grid;gap:14px}
+.grid2{display:grid;gap:14px;grid-template-columns:1fr}
+@media (min-width:760px){.grid2{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}}
+.card{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.card-h{display:flex;align-items:center;gap:10px}
+.card-h .meta{margin-left:auto;font-size:13px;color:var(--muted);text-align:right}
+.empty{color:var(--muted);font-size:14px;padding:4px 0}
+
+/* fields */
+.fields{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-size:12px;font-weight:600;color:var(--ink-2)}
+.inp{width:100%;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-sm);padding:10px 11px;font-size:16px;font-variant-numeric:tabular-nums}
+.inp:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.unit{position:relative}
+.unit .inp{padding-right:44px}
+input[type=time].inp{-webkit-appearance:none;appearance:none;display:block;min-height:46px;max-width:100%;text-align:left}
+input[type=time].inp::-webkit-date-and-time-value{text-align:left}
+.unit span{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted);pointer-events:none}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row > .inp{flex:1 1 140px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:var(--r-sm);padding:9px 14px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.small{padding:6px 10px;font-size:13px}
+.btn.danger{color:var(--crit-text);border-color:color-mix(in srgb,var(--crit) 45%,var(--line))}
+.btn.ghost{border-color:transparent;background:none;color:var(--ink-2)}
+.btn.ghost:hover{background:var(--surface-2)}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:11px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:7px 12px;border-radius:8px;font-weight:600;font-size:13px;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600;background:var(--surface);color:var(--ink-2)}
+button.chip:hover{border-color:var(--ink-2)}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
+
+/* progress */
+.bar{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--accent)}
+.bar.thin{height:6px}
+
+/* check rows */
+.checks{display:flex;flex-direction:column;gap:6px}
+.check{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line-soft);background:var(--surface);border-radius:12px;padding:11px 12px}
+.check:hover{border-color:var(--line)}
+.box{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);flex:none;display:grid;place-items:center;transition:background .15s,border-color .15s}
+.box svg{width:15px;height:15px;stroke:var(--accent-ink);stroke-width:3;fill:none;opacity:0}
+.check[aria-pressed="true"] .box{background:var(--accent);border-color:var(--accent)}
+.check[aria-pressed="true"] .box svg{opacity:1}
+.check[aria-pressed="true"] .ttl{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.check .ttl{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.check .note{font-size:12px;color:var(--muted);font-weight:500}
+.check .end{margin-left:auto;font-size:12px;color:var(--muted)}
+.streak{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;font-size:12px;color:var(--muted);line-height:1.2;flex:none;text-align:right}
+.streak b{font-family:var(--f-display);font-stretch:75%;font-size:18px;color:var(--ink-2)}
+.streak.on b{color:var(--accent-text)}
+.streak small{font-size:11px}
+
+/* lists */
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line-soft);min-width:0}
+.li:first-child{border-top:0}
+.li .main-t{min-width:0;flex:1}
+.li .t{font-weight:600;overflow-wrap:anywhere}
+.li .s{font-size:12px;color:var(--muted)}
+.li .amt{font-variant-numeric:tabular-nums;font-weight:650;white-space:nowrap}
+.amt.in{color:var(--good-text)}
+.x{border:0;background:none;color:var(--muted);width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none;font-size:18px;line-height:1}
+.x:hover{background:var(--surface-2);color:var(--crit-text)}
+.confirm{border:1px solid color-mix(in srgb,var(--crit) 50%,var(--line));color:var(--crit-text);background:var(--surface);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700;flex:none}
+
+/* tiles */
+.tiles{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.tile{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);padding:13px 14px;display:flex;flex-direction:column;gap:6px;min-width:0;box-shadow:var(--shadow)}
+.tile .k{font-size:12px;font-weight:600;color:var(--ink-2)}
+.tile .d{font-size:12px;color:var(--muted)}
+.delta-up{color:var(--good-text)} .delta-down{color:var(--crit-text)} .delta-flat{color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:650;color:var(--ink-2)}
+
+/* day head */
+.dayhead{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.dayhead .mid{flex:1;min-width:0}
+
+/* charts */
+.chart-wrap{position:relative}
+.chart{position:relative;width:100%;min-height:60px}
+.chart svg{display:block;width:100%;overflow:visible}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg-line{width:16px;height:2px;border-radius:2px;display:inline-block}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:0 6px 18px rgba(0,0,0,.12);white-space:nowrap;z-index:5;min-width:110px}
+.tip b{display:block;margin-bottom:3px;font-size:12px}
+.tip div{display:flex;align-items:center;gap:6px;color:var(--ink-2)}
+.tip div em{font-style:normal;margin-left:auto;padding-left:10px;color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums}
+.axis{fill:var(--muted);font-size:11px;font-family:var(--f-body);font-variant-numeric:tabular-nums}
+
+/* category bars */
+.hbars{display:flex;flex-direction:column;gap:9px}
+.hb{display:grid;grid-template-columns:minmax(90px,150px) 1fr auto;gap:10px;align-items:center;font-size:13px}
+.hb .lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
+.hb .track{height:10px;border-radius:0 4px 4px 0;overflow:hidden}
+.hb .track i{display:block;height:100%;background:var(--s1);border-radius:0 4px 4px 0;min-width:2px}
+.hb .v{font-variant-numeric:tabular-nums;font-weight:600}
+
+/* month grid */
+.mgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.mgrid .wd{font-size:11px;font-weight:700;color:var(--muted);text-align:center;letter-spacing:.06em;padding-bottom:2px}
+.mcell{aspect-ratio:1/1;max-width:100%;border-radius:8px;border:1px solid transparent;background:var(--surface-2);font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:4px 5px;color:var(--ink-2);min-width:0;position:relative}
+.mcell.out{opacity:.35}
+.mcell.today{border-color:var(--accent)}
+.mcell.sel{outline:2px solid var(--accent);outline-offset:1px}
+.mcell.future{background:none;border-color:var(--line-soft)}
+button.mcell:hover{border-color:var(--ink-2)}
+.mcell .dots{display:flex;gap:3px;flex-wrap:wrap}
+.mcell .dots i{width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.mcell .ev{font-size:10px;font-weight:600;color:var(--ink);background:var(--surface);border-radius:4px;padding:1px 4px;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:none}
+@media (min-width:760px){.cal .mcell{aspect-ratio:auto;min-height:92px;justify-content:flex-start;gap:3px}.cal .mcell .ev{display:block}.cal .mcell .dots{display:none}}
+.heat-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.heat-legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+
+/* week dots */
+.wdots{display:flex;gap:4px}
+.wdots i{width:18px;height:18px;border-radius:5px;background:var(--surface-2);display:grid;place-items:center;font-style:normal;font-size:10px;color:var(--muted)}
+.wdots i.on{background:var(--accent);color:var(--accent-ink)}
+.wdots i.na{background:none;border:1px dashed var(--line)}
+
+/* table */
+.tbl-wrap{overflow-x:auto}
+table.tbl{border-collapse:collapse;width:100%;font-size:13px;min-width:620px}
+.tbl th{text-align:right;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:6px 8px;border-bottom:1px solid var(--line)}
+.tbl td{text-align:right;padding:8px;border-bottom:1px solid var(--line-soft);font-variant-numeric:tabular-nums}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl tr:last-child td{border-bottom:0}
+
+/* event list */
+.events{display:flex;flex-direction:column;gap:6px}
+.event{display:grid;grid-template-columns:62px minmax(0,1fr) auto;align-items:start;gap:10px;padding:8px 10px;border-radius:10px;background:var(--surface-2);text-decoration:none;color:inherit;min-width:0}
+.event .tm{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent-text)}
+.event .nm{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.event .lc{font-size:12px;color:var(--muted)}
+a.nm{color:inherit;text-decoration:none} a.nm:hover{text-decoration:underline}
+.event .x{width:26px;height:26px;margin:-3px -4px 0 0}
+.evgroup-h{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:4px 0}
+.evgroup{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(130px,1fr);gap:6px;overflow-x:auto;padding-bottom:2px}
+.event.ev-c{display:flex;flex-direction:column;gap:2px;min-width:0}
+.notice{border:1px dashed var(--line);border-radius:12px;padding:12px;font-size:13px;color:var(--ink-2);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* sheet */
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(10,12,18,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet-card{background:var(--surface);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+@media (min-width:640px){.sheet{align-items:center}.sheet-card{border-radius:20px;padding:22px}}
+.sheet-h{display:flex;align-items:center;gap:10px}
+.sheet-h .icon-btn{margin-left:auto}
+.cats{display:flex;flex-wrap:wrap;gap:6px}
+
+/* toast */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;z-index:60;max-width:calc(100% - 32px)}
+@media (min-width:900px){.toast{bottom:24px}}
+.loading{padding:40px 0;color:var(--muted);text-align:center}
+.stack{display:flex;flex-direction:column;gap:14px}
+details.add > summary{list-style:none;cursor:pointer;font-weight:600;font-size:14px;color:var(--accent-text);display:inline-flex;align-items:center;gap:6px}
+details.add > summary::-webkit-details-marker{display:none}
+details.add[open] > summary{margin-bottom:10px}
+.sec-title{display:flex;align-items:baseline;gap:10px;margin:22px 0 10px}
+.sec-title .sub{margin-left:auto}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.kv span:first-child{color:var(--ink-2)}
+.kv b{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div id="app">
+  <header class="top"><div class="top-in">
+    <div class="brand"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 13 8 13 11 6 14 18 17 11 21 11"/></svg></span>Lifetracker</div>
+    <div class="savestate" id="savestate"><i></i><span>Loading</span></div>
+    <button class="icon-btn" data-act="open-settings" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </div></header>
+  <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+  <main class="main" id="main"><div class="loading">Loading your tracker…</div></main>
+  <div id="sheet" class="sheet" hidden></div>
+  <div id="toast" class="toast" hidden></div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- utilities ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const todayISO = () => iso(new Date());
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d); };
+const mondayOf = s => { const d = parse(s); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return iso(d); };
+const dayOfYear = s => { const d = parse(s); return Math.round((d - new Date(d.getFullYear(), 0, 1)) / 864e5) + 1; };
+function isoWeek(s) { const th = addDays(mondayOf(s), 3); return `${th.slice(0, 4)}-W${pad(Math.ceil(dayOfYear(th) / 7))}`; }
+const weekNo = s => Number(isoWeek(s).split('-W')[1]);
+const daysInMonth = (y, m) => new Date(y, m, 0).getDate();
+const monthEnd = mk => { const [y, m] = mk.split('-').map(Number); return `${mk}-${pad(daysInMonth(y, m))}`; };
+const nextMonth = mk => { let [y, m] = mk.split('-').map(Number); m++; if (m > 12) { m = 1; y++; } return `${y}-${pad(m)}`; };
+const prevMonth = mk => { let [y, m] = mk.split('-').map(Number); m--; if (m < 1) { m = 12; y--; } return `${y}-${pad(m)}`; };
+const rid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-5);
+const num = v => { if (v === null || v === undefined) return null; const s = String(v).trim().replace(',', '.').replace(/\s/g, ''); if (s === '') return null; const n = Number(s); return Number.isFinite(n) ? n : NaN; };
+const fmt = (n, d = 0) => n == null || isNaN(n) ? '–' : Number(n).toLocaleString('en-GB', { minimumFractionDigits: d, maximumFractionDigits: d });
+const money = (n, cur = 'PLN') => { if (n == null || isNaN(n)) return '–'; const v = fmt(Math.abs(n), 2); const s = n < 0 ? '−' : ''; return cur === 'EUR' ? `${s}€${v}` : cur === 'USD' ? `${s}$${v}` : `${s}${v} zł`; };
+const fmtDur = m => m == null ? '–' : `${Math.floor(m / 60)}h ${pad(Math.round(m % 60))}m`;
+const fmtLong = s => parse(s).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+const fmtShort = s => parse(s).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+const fmtDM = s => parse(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+const fmtMonth = mk => parse(mk + '-01').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+const fmtMonShort = mk => parse(mk + '-01').toLocaleDateString('en-GB', { month: 'short' });
+const avg = a => { const v = a.filter(x => x != null && !isNaN(x)); return v.length ? v.reduce((s, x) => s + x, 0) / v.length : null; };
+const sum = a => a.reduce((s, x) => s + (x || 0), 0);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const hm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const CHECK = '<svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* ---------- defaults (used until settings are saved) ---------- */
+const DEFAULTS = {
+  start: null,
+  kcalTarget: 3000,
+  proteinTarget: null,
+  habits: [
+    { id: 'bluelight', name: 'Blue light filter from 21:00' },
+    { id: 'creatine', name: 'Creatine', note: 'Any time of day' },
+    { id: 'ashwagandha', name: 'Ashwagandha', note: 'With the last meal' },
+    { id: 'reading', name: 'Read at least 1 chapter' }
+  ],
+  expenseCats: ['Groceries', 'Eating out', 'Transport', 'Housing & bills', 'Subscriptions', 'Sport & supplements', 'Health', 'Clothes', 'Entertainment', 'Education', 'Gifts', 'Other'],
+  incomeCats: ['Salary', 'Freelance', 'Coaching', 'Gift', 'Sale', 'Other'],
+  fx: { EUR: 4.25, USD: 3.65 },
+  hiddenCals: []
+};
+const WORKOUTS = [
+  { id: 'gym', name: 'Gym', color: 'var(--s1)' },
+  { id: 'football', name: 'Football', color: 'var(--s2)' },
+  { id: 'swimming', name: 'Swimming', color: 'var(--s3)' },
+  { id: 'other', name: 'Other', color: 'var(--s4)' }
+];
+const wType = id => WORKOUTS.find(w => w.id === id) || WORKOUTS[3];
+const CURRENCIES = ['PLN', 'EUR', 'USD'];
+const INV = 'Investments';
+const CAL = 'Google Calendar', CAL_TOOL = 'list_events';
+
+/* ---------- state ---------- */
+const S = {
+  db: null, mcp: null, status: 'loading',
+  days: {}, tx: [], rec: [], sav: [], goals: [], settings: null,
+  loaded: {}, fresh: {},
+  tab: 'today', date: null,
+  health: { range: 30 },
+  money: { anchor: null },
+  goalsUI: { level: 'day', anchor: null },
+  review: { level: 'week', anchor: null },
+  calUI: { view: 'month', anchor: null, sel: null },
+  cal: { day: {}, range: {} }, calendars: null, calListErr: null, calRole: {}, evHidden: new Set(),
+  confirm: null, sheet: null, genDone: null, lastToday: todayISO()
+};
+const cfg = () => {
+  const s = S.settings || {};
+  return {
+    ...DEFAULTS, ...s,
+    fx: { ...DEFAULTS.fx, ...(s.fx || {}) },
+    habits: s.habits || DEFAULTS.habits,
+    expenseCats: s.expenseCats || DEFAULTS.expenseCats,
+    incomeCats: s.incomeCats || DEFAULTS.incomeCats,
+    start: s.start || firstDataDay() || todayISO()
+  };
+};
+function firstDataDay() { const k = Object.keys(S.days).sort(); return k[0] || null; }
+const viewDate = () => S.date || todayISO();
+const day = d => S.days[d] || {};
+const activeHabits = d => cfg().habits.filter(h => (!h.from || h.from <= d) && (!h.to || d < h.to));
+const toPLN = (amount, cur) => cur === 'PLN' ? amount : amount * (cfg().fx[cur] || 1);
+
+/* ---------- writes ---------- */
+let pending = 0;
+const chains = {};
+function setSaveState() {
+  const el = $('#savestate'); if (!el) return;
+  const L = window.LT, ls = L ? L.state() : 'synced';
+  if (S.status === 'ready' && L) {
+    if (ls === 'signin') { el.className = 'savestate busy'; el.innerHTML = '<i></i><button class="btn small" data-act="lt-signin">Sign in to sync</button>'; return; }
+    if (ls === 'offline') { el.className = 'savestate busy'; el.innerHTML = `<i></i><span>${L.pending() ? 'Offline · saved on this phone' : 'Offline'}</span>`; return; }
+    if (ls === 'error') { el.className = 'savestate busy'; el.innerHTML = '<i></i><button class="btn small" data-act="lt-sync">Sync failed · retry</button>'; return; }
+    if (ls === 'syncing' || pending) { el.className = 'savestate busy'; el.innerHTML = '<i></i><span>Saving…</span>'; return; }
+  }
+  if (S.status === 'nodb') { el.className = 'savestate busy'; el.innerHTML = '<i></i><span>Not connected</span>'; return; }
+  if (S.status === 'loading' && L && ls === 'signin') { el.className = 'savestate busy'; el.innerHTML = '<i></i><span>Signed out</span>'; return; }
+  if (S.status === 'loading') { el.className = 'savestate busy'; el.innerHTML = '<i></i><span>Loading</span>'; return; }
+  el.className = 'savestate' + (pending ? ' busy' : '');
+  el.innerHTML = `<i></i><span>${pending ? 'Saving…' : 'Saved'}</span>`;
+}
+function writeError(e) {
+  const c = e && e.code;
+  const msg = c === 'quota_exceeded' ? 'Storage is full. Delete some old entries, then try again.'
+    : c === 'revoked' ? 'This page lost access to your data. Reload the page to continue.'
+    : c === 'invalid_argument' ? 'That change could not be saved. Check the values and try again.'
+    : 'Could not save. Check your connection and try again.';
+  toast(msg, 4500);
+}
+function queue(path, fn) {
+  pending++; setSaveState();
+  const run = async () => {
+    try { await fn(); }
+    catch (e) {
+      if (e && e.code === 'unavailable') { await new Promise(r => setTimeout(r, 600 + Math.random() * 800)); await fn(); }
+      else throw e;
+    }
+  };
+  const p = (chains[path] || Promise.resolve()).then(run).catch(writeError).finally(() => { pending--; setSaveState(); });
+  chains[path] = p; return p;
+}
+function mergeDoc(coll, id, patch) {
+  if (!S.db) return;
+  const path = `${coll}/${id}`;
+  return queue(path, async () => { const ref = S.db.doc(path); const snap = await ref.get(); if (snap.exists) await ref.update(patch); else await ref.set(patch); });
+}
+function setDoc(coll, id, data) { if (!S.db) return; const path = `${coll}/${id}`; return queue(path, () => S.db.doc(path).set(data)); }
+function delDoc(coll, id) { if (!S.db) return; const path = `${coll}/${id}`; return queue(path, () => S.db.doc(path).delete()); }
+function saveDay(d, patch) {
+  const cur = S.days[d] || { date: d }, next = { ...cur };
+  for (const k in patch) { const v = patch[k]; next[k] = v && typeof v === 'object' && !Array.isArray(v) ? { ...(cur[k] || {}), ...v } : v; }
+  S.days = { ...S.days, [d]: next };
+  return mergeDoc('days', d, { date: d, ...patch });
+}
+const saveSettings = patch => mergeDoc('meta', 'settings', patch);
+
+/* ---------- data subscription ---------- */
+function subscribe() {
+  const onErr = key => e => { S.loaded[key] = true; if (e && e.code === 'revoked') toast('This page lost access to your data. Reload the page.', 5000); scheduleRender(); };
+  const coll = (name, key, fn) => S.db.collection(name).onSnapshot(snap => {
+    fn(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    S.loaded[key] = true; if (!snap.metadata.fromCache) S.fresh[key] = true; afterData();
+  }, onErr(key));
+  coll('days', 'days', rows => { const o = {}; rows.forEach(r => { o[r.id] = r; }); S.days = o; });
+  coll('tx', 'tx', rows => { S.tx = rows; });
+  coll('recurring', 'rec', rows => { S.rec = rows; });
+  coll('savings', 'sav', rows => { S.sav = rows; });
+  coll('goals', 'goals', rows => { S.goals = rows; });
+  S.db.doc('meta/settings').onSnapshot(snap => {
+    S.settings = snap.exists ? snap.data() : null; S.loaded.settings = true;
+    if (!snap.metadata.fromCache) S.fresh.settings = true; afterData();
+  }, onErr('settings'));
+}
+const KEYS = ['days', 'tx', 'rec', 'sav', 'goals', 'settings'];
+function afterData() {
+  if (S.status === 'loading' && KEYS.every(k => S.loaded[k])) S.status = 'ready';
+  setSaveState();
+  if (KEYS.every(k => S.fresh[k]) && S.genDone !== todayISO()) { S.genDone = todayISO(); generateRecurring(); }
+  scheduleRender();
+}
+
+/* ---------- recurring income & subscriptions ---------- */
+function dueDate(r, mk) {
+  if (r.cycle === 'yearly') { const sm = Number((r.start || mk).slice(5, 7)); if (Number(mk.slice(5, 7)) !== sm) return null; }
+  const [y, m] = mk.split('-').map(Number);
+  return `${mk}-${pad(Math.min(Number(r.day) || 1, daysInMonth(y, m)))}`;
+}
+async function generateRecurring() {
+  if (!S.db) return;
+  const t = todayISO(), cur = t.slice(0, 7);
+  const have = new Set(S.tx.map(x => x.id));
+  for (const r of S.rec) {
+    if (r.active === false || !r.start) continue;
+    let mk = r.start, guard = 0;
+    while (mk <= cur && guard++ < 240) {
+      const due = dueDate(r, mk);
+      const id = `r-${r.id}-${mk}`;
+      if (due && due <= t && !have.has(id) && !(r.skip || []).includes(mk)) {
+        await setDoc('tx', id, {
+          date: due, kind: r.kind === 'income' ? 'income' : 'expense', amount: r.amount, currency: r.currency || 'PLN',
+          pln: Math.round(toPLN(r.amount, r.currency || 'PLN') * 100) / 100, category: r.category || (r.kind === 'income' ? 'Salary' : 'Subscriptions'),
+          note: r.name, source: 'recurring', recId: r.id, month: mk, created: Date.now()
+        });
+      }
+      mk = nextMonth(mk);
+    }
+  }
+}
+function upcoming(mk) {
+  const t = todayISO(); const out = [];
+  for (const r of S.rec) {
+    if (r.active === false || !r.start || r.start > mk) continue;
+    const due = dueDate(r, mk);
+    if (due && due > t && !(r.skip || []).includes(mk)) out.push({ r, due });
+  }
+  return out.sort((a, b) => a.due.localeCompare(b.due));
+}
+
+/* ---------- domain math ---------- */
+function sleepMin(sl) {
+  if (!sl || !sl.bed || !sl.wake) return null;
+  const [bh, bm] = sl.bed.split(':').map(Number), [wh, wm] = sl.wake.split(':').map(Number);
+  let m = (wh * 60 + wm) - (bh * 60 + bm); if (m <= 0) m += 1440; return m;
+}
+const band = s => s == null ? null : s >= 80 ? { k: 'Good', c: 'var(--good)' } : s >= 60 ? { k: 'Fair', c: 'var(--warn)' } : { k: 'Poor', c: 'var(--crit)' };
+function weightAvg7(d) { const v = []; for (let i = 0; i < 7; i++) { const w = day(addDays(d, -i)).weight; if (w != null) v.push(w); } return avg(v); }
+function lastWeightBefore(d) { const ks = Object.keys(S.days).filter(k => k < d && S.days[k].weight != null).sort(); return ks.length ? S.days[ks[ks.length - 1]].weight : null; }
+function dayHabitStat(d) {
+  const hs = activeHabits(d); const h = day(d).habits || {};
+  const done = hs.filter(x => h[x.id]).length; return { done, total: hs.length, pct: hs.length ? done / hs.length : null };
+}
+function habitStreak(id, upto) {
+  const c = cfg(), isOn = d => activeHabits(d).some(h => h.id === id) && !!(day(d).habits || {})[id];
+  let cur = 0, d = isOn(upto) ? upto : addDays(upto, -1);
+  while (d >= c.start && isOn(d)) { cur++; d = addDays(d, -1); }
+  let best = 0, run = 0;
+  for (let x = c.start; x <= upto; x = addDays(x, 1)) { if (isOn(x)) { run++; if (run > best) best = run; } else if (x !== upto) run = 0; }
+  return { cur, best };
+}
+function contributions(start, end) {
+  const out = [];
+  S.sav.forEach(g => (g.contributions || []).forEach(c => { if (c.date >= start && c.date <= end) out.push({ ...c, goal: g }); }));
+  return out;
+}
+function agg(start, end) {
+  const t = todayISO(), last = end < t ? end : t, c = cfg();
+  const dates = []; for (let d = start; d <= last; d = addDays(d, 1)) dates.push(d);
+  const docs = dates.map(day);
+  const scores = docs.map(x => x.sleep && x.sleep.score), mins = docs.map(x => sleepMin(x.sleep));
+  const weights = docs.map(x => x.weight), kcal = docs.map(x => x.kcal), prot = docs.map(x => x.protein);
+  const workouts = docs.flatMap(x => x.workouts || []);
+  const byType = {}; WORKOUTS.forEach(w => byType[w.id] = { n: 0, min: 0 });
+  workouts.forEach(w => { const k = byType[w.type] ? w.type : 'other'; byType[k].n++; byType[k].min += w.min || 0; });
+  const habitDates = dates.filter(d => d >= c.start);
+  const perHabit = {}; let hDone = 0, hTotal = 0;
+  habitDates.forEach(d => { const hs = activeHabits(d), h = day(d).habits || {}; hs.forEach(x => { perHabit[x.id] = perHabit[x.id] || { done: 0, total: 0, name: x.name }; perHabit[x.id].total++; hTotal++; if (h[x.id]) { perHabit[x.id].done++; hDone++; } }); });
+  const txs = S.tx.filter(x => x.date >= start && x.date <= end);
+  const isInv = x => x.kind === 'expense' && x.category === INV;
+  const income = sum(txs.filter(x => x.kind === 'income').map(x => x.pln)), expense = sum(txs.filter(x => x.kind === 'expense' && !isInv(x)).map(x => x.pln)), invested = sum(txs.filter(isInv).map(x => x.pln));
+  const byCat = {}; txs.filter(x => x.kind === 'expense' && !isInv(x)).forEach(x => { byCat[x.category || 'Other'] = (byCat[x.category || 'Other'] || 0) + (x.pln || 0); });
+  const saved = sum(contributions(start, end).map(x => x.pln));
+  const kc = kcal.filter(v => v != null);
+  return {
+    dates, nDays: dates.length,
+    sleepScore: avg(scores), sleepMin: avg(mins), sleepN: scores.filter(v => v != null).length,
+    weight: avg(weights), weightN: weights.filter(v => v != null).length,
+    kcal: avg(kcal), kcalN: kc.length, kcalOn: kc.filter(v => v >= c.kcalTarget).length, protein: avg(prot),
+    sessions: workouts.length, trainMin: sum(workouts.map(w => w.min)), trainKcal: sum(workouts.map(w => w.kcal)), byType,
+    habitPct: hTotal ? hDone / hTotal : null, perHabit, habitDays: habitDates.length,
+    income, expense, saved, invested, left: income - expense - saved - invested, byCat, txN: txs.length
+  };
+}
+
+/* ---------- periods ---------- */
+function period(level, anchor) {
+  if (level === 'day') return { key: anchor, start: anchor, end: anchor, label: fmtLong(anchor) };
+  if (level === 'week') { const s = mondayOf(anchor), e = addDays(s, 6); return { key: isoWeek(s), start: s, end: e, label: `Week ${weekNo(s)}`, sub: `${fmtDM(s)} – ${fmtDM(e)} ${e.slice(0, 4)}` }; }
+  if (level === 'month') { const k = anchor.slice(0, 7); return { key: k, start: k + '-01', end: monthEnd(k), label: fmtMonth(k) }; }
+  const y = anchor.slice(0, 4); return { key: y, start: y + '-01-01', end: y + '-12-31', label: y };
+}
+function shift(level, anchor, dir) {
+  if (level === 'day') return addDays(anchor, dir);
+  if (level === 'week') return addDays(anchor, 7 * dir);
+  if (level === 'month') return (dir > 0 ? nextMonth(anchor.slice(0, 7)) : prevMonth(anchor.slice(0, 7))) + '-01';
+  return `${Number(anchor.slice(0, 4)) + dir}-01-01`;
+}
+function prevPeriod(level, p) { const a = shift(level, p.start, -1); return period(level, a); }
+const LEVELS = [['day', 'Day'], ['week', 'Week'], ['month', 'Month'], ['year', 'Year']];
+const PARENT = { month: 'year', week: 'month', day: 'week' };
+function parentKeys(level, p) {
+  if (level === 'month') return [p.key.slice(0, 4)];
+  if (level === 'week') return [...new Set([p.start.slice(0, 7), p.end.slice(0, 7)])];
+  if (level === 'day') return [isoWeek(p.key)];
+  return [];
+}
+const goalsFor = (level, key) => S.goals.filter(g => g.level === level && g.period === key).sort((a, b) => (a.created || 0) - (b.created || 0));
+const children = id => S.goals.filter(g => g.parent === id);
+function goalProgress(g) { if (g.done) return 1; const ch = children(g.id); if (!ch.length) return 0; return ch.filter(x => x.done || goalProgress(x) === 1).length / ch.length; }
+
+/* ---------- charts ---------- */
+const charts = {};
+function niceStep(raw) { const p = Math.pow(10, Math.floor(Math.log10(raw))); const f = raw / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; }
+function chartSlot(id, spec) {
+  charts[id] = spec;
+  const lg = spec.series.length > 1 || spec.target != null ? `<div class="legend">${spec.series.map(s => `<span>${s.type === 'line' ? `<i class="lg-line" style="background:${s.color}"></i>` : `<i class="dot" style="background:${s.color}"></i>`}${esc(s.name)}</span>`).join('')}${spec.target != null ? `<span><i class="lg-line" style="background:repeating-linear-gradient(90deg,var(--ink-2) 0 4px,transparent 4px 7px)"></i>${esc(spec.targetLabel || 'Target')}</span>` : ''}${spec.extraLegend || ''}</div>` : '';
+  return `<div class="chart-wrap">${lg}<div class="chart" data-chart="${id}" style="height:${spec.height || 190}px"></div></div>`;
+}
+function drawCharts() { document.querySelectorAll('[data-chart]').forEach(el => { const sp = charts[el.dataset.chart]; if (sp) drawChart(el, sp); }); }
+function drawChart(el, sp) {
+  const W = Math.max(260, el.clientWidth || 600), H = sp.height || 190, L = 42, R = 10, T = 10, B = 24;
+  const n = sp.labels.length, pw = W - L - R, ph = H - T - B;
+  const bars = sp.series.filter(s => s.type === 'bar');
+  let vals = [];
+  if (sp.stack) { for (let i = 0; i < n; i++) vals.push(sum(bars.map(s => s.values[i]))); sp.series.filter(s => s.type !== 'bar').forEach(s => vals.push(...s.values)); }
+  else sp.series.forEach(s => vals.push(...s.values));
+  vals = vals.filter(v => v != null && !isNaN(v)); if (sp.target != null) vals.push(sp.target);
+  if (!vals.length) { el.innerHTML = `<div class="empty" style="padding-top:20px">No entries in this range yet.</div>`; return; }
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (sp.zero || bars.length) lo = Math.min(0, lo);
+  if (hi === lo) { hi += 1; if (!(sp.zero || bars.length)) lo -= 1; }
+  if (sp.minHi != null) hi = Math.max(hi, sp.minHi);
+  let step = niceStep((hi - lo) / 4); if (sp.int) step = Math.max(1, Math.round(step)); lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step; if (sp.max != null) hi = Math.min(hi, sp.max);
+  const y = v => T + ph - (v - lo) / (hi - lo) * ph, band = pw / n, x = i => L + band * (i + .5);
+  const bw = Math.max(2, Math.min(band * (sp.stack ? .62 : .66), 18));
+  let g = '';
+  for (let v = lo; v <= hi + 1e-9; v += step) { const yy = y(v).toFixed(1); g += `<line x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}" stroke="var(--line-soft)" stroke-width="1"/><text class="axis" x="${L - 7}" y="${(+yy + 4)}" text-anchor="end">${(sp.yFmt || (z => fmt(z, step < 1 ? 1 : 0)))(v)}</text>`; }
+  g += `<line x1="${L}" x2="${W - R}" y1="${y(lo)}" y2="${y(lo)}" stroke="var(--line)" stroke-width="1"/>`;
+  const every = Math.max(1, Math.ceil(n / Math.max(2, Math.floor(pw / 70))));
+  for (let i = 0; i < n; i += every) g += `<text class="axis" x="${x(i).toFixed(1)}" y="${H - 6}" text-anchor="middle">${esc((sp.xFmt || fmtDM)(sp.labels[i]))}</text>`;
+  const rbar = (cx, y0, y1, fill, roundTop) => {
+    const h = y0 - y1, xx = cx - bw / 2; if (h <= 0.5) return '';
+    const r = roundTop ? Math.min(4, h, bw / 2) : 0;
+    if (!r) return `<rect x="${xx.toFixed(1)}" y="${y1.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${fill}"/>`;
+    return `<path d="M${xx.toFixed(1)},${y0.toFixed(1)}V${(y1 + r).toFixed(1)}Q${xx.toFixed(1)},${y1.toFixed(1)} ${(xx + r).toFixed(1)},${y1.toFixed(1)}H${(xx + bw - r).toFixed(1)}Q${(xx + bw).toFixed(1)},${y1.toFixed(1)} ${(xx + bw).toFixed(1)},${(y1 + r).toFixed(1)}V${y0.toFixed(1)}Z" fill="${fill}"/>`;
+  };
+  if (sp.stack) {
+    for (let i = 0; i < n; i++) {
+      let acc = 0; const segs = bars.map(s => ({ s, v: s.values[i] || 0 })).filter(z => z.v > 0);
+      segs.forEach((z, j) => { const y0 = y(lo + acc), y1 = y(lo + acc + z.v); acc += z.v; const top = j === segs.length - 1; g += rbar(x(i), y0 - (j ? 1 : 0), y1 + (top ? 0 : 1), z.s.color, top); });
+    }
+  } else bars.forEach(s => s.values.forEach((v, i) => { if (v != null && !isNaN(v)) g += rbar(x(i), y(Math.max(lo, 0)), y(v), s.colorFn ? s.colorFn(v, i) : s.color, true); }));
+  if (sp.target != null) { const ty = y(sp.target); g += `<line x1="${L}" x2="${W - R}" y1="${ty}" y2="${ty}" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="4 3"/>`; }
+  sp.series.filter(s => s.type === 'dots').forEach(s => s.values.forEach((v, i) => { if (v != null) g += `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3.5" fill="${s.color}" stroke="var(--surface)" stroke-width="1.5"/>`; }));
+  sp.series.filter(s => s.type === 'line').forEach(s => {
+    let d = '', pen = false; s.values.forEach((v, i) => { if (v == null) { pen = false; return; } d += `${pen ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`; pen = true; });
+    g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    for (let i = n - 1; i >= 0; i--) if (s.values[i] != null) { g += `<circle cx="${x(i)}" cy="${y(s.values[i])}" r="4" fill="${s.color}" stroke="var(--surface)" stroke-width="2"/>`; break; }
+  });
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="${esc(sp.title || 'Chart')}">${g}<line class="xh" x1="0" x2="0" y1="${T}" y2="${T + ph}" stroke="var(--ink-2)" stroke-width="1" opacity="0"/><rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent"/></svg><div class="tip" hidden></div>`;
+  const svg = el.querySelector('svg'), tip = el.querySelector('.tip'), xh = el.querySelector('.xh');
+  const show = ev => {
+    const rect = svg.getBoundingClientRect(); const px = (ev.clientX - rect.left) * (W / rect.width);
+    const i = clamp(Math.floor((px - L) / band), 0, n - 1);
+    const rows = sp.series.map(s => s.values[i] == null ? '' : `<div><i class="dot" style="background:${s.colorFn ? s.colorFn(s.values[i], i) : s.color}"></i>${esc(s.name)}<em>${(s.fmt || sp.tipFmt || (v => fmt(v, 1)))(s.values[i])}</em></div>`).join('');
+    tip.innerHTML = `<b>${esc((sp.tipLabel || fmtShort)(sp.labels[i]))}</b>${rows || '<div>No entry</div>'}`;
+    tip.hidden = false; xh.setAttribute('x1', x(i)); xh.setAttribute('x2', x(i)); xh.setAttribute('opacity', '.35');
+    const cx = x(i) * rect.width / W, tw = tip.offsetWidth;
+    tip.style.left = clamp(cx + 12 + tw > rect.width ? cx - tw - 12 : cx + 12, 0, Math.max(0, rect.width - tw)) + 'px'; tip.style.top = '6px';
+  };
+  svg.addEventListener('pointermove', show); svg.addEventListener('pointerdown', show);
+  svg.addEventListener('pointerleave', () => { tip.hidden = true; xh.setAttribute('opacity', '0'); });
+}
+
+/* ---------- small render helpers ---------- */
+const delBtn = (kind, id, label = 'Delete') => S.confirm === `${kind}:${id}` ? `<button class="confirm" data-act="del" data-kind="${kind}" data-id="${esc(id)}">Confirm delete</button>` : `<button class="x" data-act="del" data-kind="${kind}" data-id="${esc(id)}" aria-label="${esc(label)}">×</button>`;
+const pnav = (act, label, sub, disableNext) => `<div class="pernav"><button class="icon-btn" data-act="${act}" data-dir="-1" aria-label="Previous"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><div class="lbl"><div>${esc(label)}</div>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}</div><button class="icon-btn" data-act="${act}" data-dir="1" aria-label="Next" ${disableNext ? 'disabled' : ''}><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></div>`;
+const seg = (act, items, cur) => `<div class="seg" role="group">${items.map(([v, l]) => `<button data-act="${act}" data-v="${v}" aria-pressed="${v == cur}">${l}</button>`).join('')}</div>`;
+function deltaHTML(cur, prev, unit, d = 1, goodUp = true, label = 'vs previous') {
+  if (cur == null || prev == null) return '';
+  const diff = cur - prev; const flat = Math.abs(diff) < Math.pow(10, -d) / 2;
+  const cls = flat ? 'delta-flat' : (diff > 0) === goodUp ? 'delta-up' : 'delta-down';
+  return `<span class="${cls}">${flat ? '±0' : (diff > 0 ? '+' : '−') + fmt(Math.abs(diff), d)}${unit}</span> ${label}`;
+}
+const scorePill = s => { const b = band(s); return b ? `<span class="pill"><i class="dot" style="background:${b.c}"></i>${b.k}</span>` : ''; };
+const tile = (k, v, d) => `<div class="tile"><div class="k">${k}</div><div class="big">${v}</div>${d ? `<div class="d">${d}</div>` : ''}</div>`;
+const heatColor = p => p == null ? 'var(--surface-2)' : `color-mix(in srgb, var(--accent) ${Math.round(18 + p * 82)}%, var(--surface-2))`;
+const heatInk = p => p != null && p >= .55 ? 'var(--accent-ink)' : 'var(--ink-2)';
+
+/* ---------- views: Today ---------- */
+function renderToday() {
+  const d = viewDate(), t = todayISO(), isToday = d === t, doc = day(d), c = cfg();
+  const sl = doc.sleep || {}, mins = sleepMin(sl);
+  const hs = activeHabits(d), hv = doc.habits || {}, hDone = hs.filter(h => hv[h.id]).length;
+  const prevW = lastWeightBefore(d);
+  const yr = Number(d.slice(0, 4)), diy = (yr % 4 === 0 && yr % 100 !== 0) || yr % 400 === 0 ? 366 : 365;
+  const dg = goalsFor('day', d);
+  const wk = isoWeek(d), wg = goalsFor('week', wk);
+  let carry = '';
+  if (isToday) {
+    const y = goalsFor('day', addDays(d, -1)).filter(g => !g.done && !dg.some(x => x.title === g.title));
+    if (y.length) carry = `<button class="chip" data-act="carry">Copy ${y.length} unfinished from yesterday</button>`;
+  }
+  const wo = doc.workouts || [];
+  const kcal = doc.kcal, kp = kcal != null ? clamp(kcal / c.kcalTarget, 0, 1) : 0;
+  const txs = S.tx.filter(x => x.date === d).sort((a, b) => (a.created || 0) - (b.created || 0));
+  const mA = agg(d.slice(0, 7) + '-01', monthEnd(d.slice(0, 7)));
+  const ev = calBlock('day', d);
+
+  return `
+  <section class="dayhead">
+    <button class="icon-btn" data-act="day" data-dir="-1" aria-label="Previous day"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div class="mid">
+      <div class="eyebrow">${isToday ? 'Today' : d === addDays(t, -1) ? 'Yesterday' : 'Past day'} · Week ${weekNo(d)} · Day ${dayOfYear(d)} of ${diy}</div>
+      <h1 class="display">${esc(fmtLong(d))}</h1>
+    </div>
+    ${!isToday ? `<button class="btn small" data-act="day-today">Today</button>` : ''}
+    <button class="icon-btn" data-act="day" data-dir="1" aria-label="Next day" ${isToday ? 'disabled' : ''}><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+  </section>
+  <div class="grid2">
+    <section class="card">
+      <div class="card-h"><h2>Morning check-in</h2><div class="meta">${scorePill(sl.score)}</div></div>
+      <div class="fields">
+        <div class="field"><label for="f-weight">Weight, fasted</label><div class="unit"><input class="inp" id="f-weight" inputmode="decimal" autocomplete="off" placeholder="74.0" data-day-field="weight" data-type="dec" value="${doc.weight ?? ''}"><span>kg</span></div></div>
+        <div class="field"><label for="f-score">Sleep Score</label><div class="unit"><input class="inp" id="f-score" inputmode="numeric" autocomplete="off" placeholder="1–100" data-day-field="sleep.score" data-type="score" value="${sl.score ?? ''}"><span>/100</span></div></div>
+        <div class="field"><label for="f-bed">Fell asleep</label><input class="inp" id="f-bed" type="time" data-day-field="sleep.bed" data-type="time" value="${esc(sl.bed || '')}"></div>
+        <div class="field"><label for="f-wake">Woke up</label><input class="inp" id="f-wake" type="time" data-day-field="sleep.wake" data-type="time" value="${esc(sl.wake || '')}"></div>
+      </div>
+      <div class="row" style="justify-content:space-between">
+        <span class="sub">Slept <b class="num" style="color:var(--ink)">${fmtDur(mins)}</b></span>
+        <span class="sub">${doc.weight != null && prevW != null ? deltaHTML(doc.weight, prevW, ' kg', 1, true, 'vs last weigh-in') + ' · ' : ''}7-day avg <b class="num" style="color:var(--ink)">${weightAvg7(d) != null ? fmt(weightAvg7(d), 1) + ' kg' : '–'}</b></span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><h2>Habits</h2><div class="meta num">${hDone}/${hs.length} done</div></div>
+      <div class="checks">
+        ${hs.map(h => { const st = habitStreak(h.id, d); return `<button class="check" data-act="habit" data-id="${esc(h.id)}" aria-pressed="${!!hv[h.id]}"><span class="box">${CHECK}</span><span><span class="ttl">${esc(h.name)}</span>${h.note ? `<br><span class="note">${esc(h.note)}</span>` : ''}</span><span class="streak ${st.cur ? 'on' : ''}" title="Best: ${st.best} days"><b class="num">${st.cur}</b> ${st.cur === 1 ? 'day' : 'days'}<small>best ${st.best}</small></span></button>`; }).join('') || '<div class="empty">No habits yet. Add them in Settings.</div>'}
+      </div>
+      <div class="sub">${isToday ? 'Resets at midnight. Every day is saved in Review.' : 'Editing a past day.'}</div>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><h2>Goals for the day</h2><div class="meta num">${dg.filter(g => g.done).length}/${dg.length}</div></div>
+      ${dg.length ? `<div class="checks">${dg.map(g => `<button class="check" data-act="goal-toggle" data-id="${esc(g.id)}" aria-pressed="${!!g.done}"><span class="box">${CHECK}</span><span class="ttl">${esc(g.title)}</span></button>`).join('')}</div>` : `<div class="empty">Nothing planned yet. Add the first goal for ${isToday ? 'today' : 'this day'}.</div>`}
+      <form class="row" data-form="goal-day"><input class="inp" id="f-daygoal" placeholder="Add a goal for ${isToday ? 'today' : 'this day'}" autocomplete="off" maxlength="140"><button class="btn primary" type="submit">Add</button></form>
+      <div class="row">${carry}<button class="chip" data-act="goto-goals" data-level="week">This week: ${wg.filter(g => g.done).length}/${wg.length} goals</button></div>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><h2>Nutrition</h2><div class="meta">from Fitatu</div></div>
+      <div class="fields">
+        <div class="field"><label for="f-kcal">Calories</label><div class="unit"><input class="inp" id="f-kcal" inputmode="numeric" autocomplete="off" placeholder="0" data-day-field="kcal" data-type="int" value="${kcal ?? ''}"><span>kcal</span></div></div>
+        <div class="field"><label for="f-protein">Protein</label><div class="unit"><input class="inp" id="f-protein" inputmode="numeric" autocomplete="off" placeholder="0" data-day-field="protein" data-type="int" value="${doc.protein ?? ''}"><span>g</span></div></div>
+      </div>
+      <div class="bar"><i style="width:${kp * 100}%"></i></div>
+      <div class="row" style="justify-content:space-between"><span class="sub num">${fmt(kcal || 0)} / ${fmt(c.kcalTarget)} kcal</span><span class="sub">${kcal == null ? 'Not logged' : kcal >= c.kcalTarget ? `Target reached${kcal > c.kcalTarget ? ` (+${fmt(kcal - c.kcalTarget)})` : ''}` : `${fmt(c.kcalTarget - kcal)} kcal to go`}${c.proteinTarget ? ` · protein ${fmt(doc.protein || 0)}/${fmt(c.proteinTarget)} g` : ''}</span></div>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><h2>Training</h2><div class="meta">${wo.length ? `${fmt(sum(wo.map(w => w.min)))} min · ${fmt(sum(wo.map(w => w.kcal)))} kcal` : 'Rest day so far'}</div></div>
+      ${wo.length ? `<div class="list">${wo.map(w => `<div class="li"><i class="dot" style="background:${wType(w.type).color}"></i><div class="main-t"><div class="t">${esc(wType(w.type).name)}</div><div class="s num">${fmt(w.min)} min${w.kcal ? ` · ${fmt(w.kcal)} kcal burned` : ''}${w.note ? ` · ${esc(w.note)}` : ''}</div></div>${delBtn('workout', w.id, 'Delete session')}</div>`).join('')}</div>` : ''}
+      <details class="add" id="d-workout" ${wo.length ? '' : 'open'}><summary>+ Log a session</summary>
+        <form class="stack" data-form="workout" style="gap:10px">
+          <div class="seg" role="group" aria-label="Session type">${WORKOUTS.map((w, i) => `<button type="button" data-act="wtype" data-v="${w.id}" aria-pressed="${(S.wtype || 'gym') === w.id}">${w.name}</button>`).join('')}</div>
+          <div class="fields">
+            <div class="field"><label for="f-wmin">Duration</label><div class="unit"><input class="inp" id="f-wmin" inputmode="numeric" autocomplete="off" placeholder="60"><span>min</span></div></div>
+            <div class="field"><label for="f-wkcal">Burned (Polar)</label><div class="unit"><input class="inp" id="f-wkcal" inputmode="numeric" autocomplete="off" placeholder="450"><span>kcal</span></div></div>
+          </div>
+          <input class="inp" id="f-wnote" placeholder="Note (optional), e.g. push day" autocomplete="off" maxlength="120">
+          <div><button class="btn primary" type="submit">Save session</button></div>
+        </form>
+      </details>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><h2>Calendar</h2><div class="meta">${S.mcp && S.calendars ? `<button class="btn small" data-act="ev-new" data-d="${d}">+ Event</button>` : 'Google Calendar'}</div></div>
+      ${ev}
+    </section>
+
+    <section class="card span2">
+      <div class="card-h"><h2>Money</h2><div class="meta">${esc(fmtMonth(d.slice(0, 7)))}: <span class="num">in ${money(mA.income)} · out ${money(mA.expense)}${mA.invested ? ` · invested ${money(mA.invested)}` : ''}</span></div></div>
+      ${txs.length ? `<div class="list">${txs.map(txRow).join('')}</div>` : `<div class="empty">No money in or out ${isToday ? 'today' : 'on this day'}.</div>`}
+      <div class="row"><button class="btn primary" data-act="tx-new" data-kind="expense">+ Expense</button><button class="btn" data-act="tx-new" data-kind="income">+ Income</button></div>
+    </section>
+  </div>`;
+}
+function txRow(x) {
+  const orig = x.currency && x.currency !== 'PLN' ? ` · ${money(x.amount, x.currency)}` : '';
+  return `<div class="li"><div class="main-t"><div class="t">${esc(x.note || x.category || (x.kind === 'income' ? 'Income' : 'Expense'))}</div><div class="s">${esc(x.category || '')}${x.source === 'recurring' ? ' · automatic' : ''}${orig}</div></div><div class="amt ${x.kind === 'income' ? 'in' : ''}">${x.kind === 'income' ? '+' : '−'}${money(x.pln)}</div>${delBtn('tx', x.id, 'Delete entry')}</div>`;
+}
+
+/* ---------- views: Health ---------- */
+function bucketize(dates, fn, size) {
+  if (size === 1) return { labels: dates, values: dates.map(fn) };
+  const labels = [], values = [];
+  for (let i = 0; i < dates.length; i += size) { const chunk = dates.slice(i, i + size); labels.push(chunk[0]); values.push(avg(chunk.map(fn))); }
+  return { labels, values };
+}
+function renderHealth() {
+  const R = S.health.range, t = todayISO(), start = addDays(t, -(R - 1));
+  const dates = []; for (let d = start; d <= t; d = addDays(d, 1)) dates.push(d);
+  const A = agg(start, t), P = agg(addDays(start, -R), addDays(start, -1)), c = cfg();
+  const lastW = (() => { for (let i = dates.length - 1; i >= 0; i--) if (day(dates[i]).weight != null) return { d: dates[i], w: day(dates[i]).weight }; return null; })();
+  const w7 = weightAvg7(t), w7p = weightAvg7(addDays(t, -7));
+  const size = R > 90 ? 7 : 1, lblW = size === 7 ? (s => 'Week of ' + fmtDM(s)) : fmtShort;
+  const wDaily = bucketize(dates, d => day(d).weight, size);
+  const wAvg = size === 1 ? dates.map(weightAvg7) : null;
+  const sc = bucketize(dates, d => (day(d).sleep || {}).score, size);
+  const sm = bucketize(dates, d => { const m = sleepMin(day(d).sleep); return m == null ? null : m / 60; }, size);
+  const kc = bucketize(dates, d => day(d).kcal, size);
+  const weeks = []; for (let w = mondayOf(start); w <= t; w = addDays(w, 7)) weeks.push(w);
+  const tSeries = WORKOUTS.map(wt => ({ name: wt.name, type: 'bar', color: wt.color, values: weeks.map(w => { let n = 0; for (let i = 0; i < 7; i++) { const d = addDays(w, i); if (d < start || d > t) continue; n += (day(d).workouts || []).filter(x => (wType(x.type).id) === wt.id).length; } return n; }), fmt: v => `${fmt(v)} sessions` }));
+  return `
+  <div class="pagehead"><div class="grow"><div class="eyebrow">Health</div><h1 class="display">Body, sleep and training</h1></div>${seg('hrange', [[30, '30 days'], [90, '90 days'], [365, '1 year']], R)}</div>
+  <div class="tiles">
+    ${tile('Weight, 7-day avg', w7 != null ? `${fmt(w7, 1)}<small>kg</small>` : '–', w7 != null && w7p != null ? deltaHTML(w7, w7p, ' kg', 1, true, 'vs a week ago') : lastW ? `Last: ${fmt(lastW.w, 1)} kg on ${fmtDM(lastW.d)}` : 'Log your weight each morning')}
+    ${tile('Sleep Score, avg', A.sleepScore != null ? `${fmt(A.sleepScore)}<small>/100</small>` : '–', A.sleepScore != null ? deltaHTML(A.sleepScore, P.sleepScore, '', 0, true) || scorePill(A.sleepScore) : 'From Apple Sleep Score')}
+    ${tile('Sleep, avg', A.sleepMin != null ? fmtDur(A.sleepMin) : '–', `${A.sleepN} nights logged`)}
+    ${tile('Calories, avg', A.kcal != null ? `${fmt(A.kcal)}<small>kcal</small>` : '–', `${A.kcalOn}/${A.kcalN} days at ${fmt(c.kcalTarget)}+`)}
+    ${tile('Training', `${A.sessions}<small>sessions</small>`, `${fmtDur(A.trainMin)} · ${fmt(A.trainKcal)} kcal burned`)}
+  </div>
+  <div class="grid2" style="margin-top:14px">
+    <section class="card span2"><div class="card-h"><h2>Weight</h2><div class="meta">fasted, kg</div></div>
+      ${chartSlot('c-weight', { title: 'Weight', labels: wDaily.labels, height: 210, tipLabel: lblW, series: size === 1 ? [{ name: 'Morning weight', type: 'dots', color: 'var(--muted)', values: wDaily.values, fmt: v => fmt(v, 1) + ' kg' }, { name: '7-day average', type: 'line', color: 'var(--accent)', values: wAvg, fmt: v => fmt(v, 1) + ' kg' }] : [{ name: 'Weekly average', type: 'line', color: 'var(--accent)', values: wDaily.values, fmt: v => fmt(v, 1) + ' kg' }] })}
+    </section>
+    <section class="card"><div class="card-h"><h2>Sleep Score</h2><div class="meta">${size === 7 ? 'weekly avg' : 'per night'}</div></div>
+      ${chartSlot('c-score', { title: 'Sleep Score', labels: sc.labels, zero: true, max: 100, tipLabel: lblW, series: [{ name: 'Sleep Score', type: 'bar', color: 'var(--s1)', colorFn: v => band(v).c, values: sc.values, fmt: v => `${fmt(v)} · ${band(v).k}` }], extraLegend: '' })}
+      <div class="legend"><span><i class="dot" style="background:var(--good)"></i>Good 80+</span><span><i class="dot" style="background:var(--warn)"></i>Fair 60–79</span><span><i class="dot" style="background:var(--crit)"></i>Poor under 60</span></div>
+    </section>
+    <section class="card"><div class="card-h"><h2>Sleep duration</h2><div class="meta">hours</div></div>
+      ${chartSlot('c-sleep', { title: 'Sleep duration', labels: sm.labels, zero: true, tipLabel: lblW, series: [{ name: 'Sleep', type: 'bar', color: 'var(--s1)', values: sm.values, fmt: v => fmtDur(v * 60) }] })}
+    </section>
+    <section class="card"><div class="card-h"><h2>Calories</h2><div class="meta">kcal</div></div>
+      ${chartSlot('c-kcal', { title: 'Calories', labels: kc.labels, zero: true, target: c.kcalTarget, targetLabel: `Target ${fmt(c.kcalTarget)}`, tipLabel: lblW, series: [{ name: 'Calories', type: 'bar', color: 'var(--s1)', values: kc.values, fmt: v => fmt(v) + ' kcal' }] })}
+    </section>
+    <section class="card"><div class="card-h"><h2>Training per week</h2><div class="meta">sessions</div></div>
+      ${chartSlot('c-train', { title: 'Training per week', labels: weeks, stack: true, zero: true, minHi: 4, int: true, yFmt: v => fmt(v), tipLabel: s => 'Week of ' + fmtDM(s), series: tSeries })}
+    </section>
+  </div>`;
+}
+
+/* ---------- views: Money ---------- */
+function renderMoney() {
+  const anchor = S.money.anchor || todayISO(), mk = anchor.slice(0, 7), t = todayISO();
+  const A = agg(mk + '-01', monthEnd(mk));
+  const txs = S.tx.filter(x => x.date.slice(0, 7) === mk).sort((a, b) => b.date.localeCompare(a.date) || (b.created || 0) - (a.created || 0));
+  const byDate = {}; txs.forEach(x => { (byDate[x.date] = byDate[x.date] || []).push(x); });
+  const cats = Object.entries(A.byCat).sort((a, b) => b[1] - a[1]); const cmax = cats.length ? cats[0][1] : 1;
+  const inc = S.rec.filter(r => r.kind === 'income'), subs = S.rec.filter(r => r.kind === 'subscription');
+  const subMonthly = sum(subs.filter(r => r.active !== false).map(r => toPLN(r.amount, r.currency || 'PLN') / (r.cycle === 'yearly' ? 12 : 1)));
+  const up = mk >= t.slice(0, 7) ? upcoming(mk) : [];
+  const c = cfg();
+  const recRow = r => {
+    const due = dueDate(r, t.slice(0, 7)); const paused = r.active === false;
+    return `<div class="li"><div class="main-t"><div class="t">${esc(r.name)}</div><div class="s">${r.cycle === 'yearly' ? `Yearly, ${fmtDM(`2000-${(r.start || '2000-01').slice(5, 7)}-${pad(r.day)}`)}` : `Monthly, day ${r.day}`} · ${esc(r.category || '')}${paused ? ' · paused' : ''}</div></div><div class="amt ${r.kind === 'income' ? 'in' : ''}">${money(r.amount, r.currency)}</div><button class="btn small ghost" data-act="rec-pause" data-id="${esc(r.id)}">${paused ? 'Resume' : 'Pause'}</button>${delBtn('rec', r.id)}</div>`;
+  };
+  const curOpts = sel => CURRENCIES.map(x => `<option ${x === sel ? 'selected' : ''}>${x}</option>`).join('');
+  return `
+  <div class="pagehead"><div class="grow"><div class="eyebrow">Money</div><h1 class="display">${esc(fmtMonth(mk))}</h1></div>${pnav('mon-nav', fmtMonShort(mk) + ' ' + mk.slice(0, 4), '', mk >= t.slice(0, 7))}</div>
+  <div class="tiles">
+    ${tile('Income', `<span class="delta-up">${money(A.income)}</span>`, '')}
+    ${tile('Expenses', money(A.expense), `${A.txN} entries`)}
+    ${tile('Saved', money(A.saved), 'to savings goals')}
+    ${tile('Invested', money(A.invested), 'category Investments')}
+    ${tile('Left', money(A.left), 'after expenses, savings, investments')}
+  </div>
+  <div class="row" style="margin:14px 0"><button class="btn primary" data-act="tx-new" data-kind="expense">+ Expense</button><button class="btn" data-act="tx-new" data-kind="income">+ One-time income</button></div>
+  <div class="grid2">
+    <section class="card"><div class="card-h"><h2>Entries</h2><div class="meta">${txs.length}</div></div>
+      ${txs.length ? Object.keys(byDate).map(dd => `<div><div class="eyebrow" style="margin:6px 0 2px">${esc(fmtShort(dd))}</div><div class="list">${byDate[dd].map(txRow).join('')}</div></div>`).join('') : '<div class="empty">No entries this month yet. Add an expense or income above.</div>'}
+      ${up.length ? `<div><div class="eyebrow" style="margin:6px 0 2px">Coming up</div><div class="list">${up.map(u => `<div class="li"><div class="main-t"><div class="t">${esc(u.r.name)}</div><div class="s">${esc(fmtShort(u.due))} · added automatically</div></div><div class="amt" style="color:var(--muted)">${u.r.kind === 'income' ? '+' : '−'}${money(u.r.amount, u.r.currency)}</div></div>`).join('')}</div></div>` : ''}
+    </section>
+    <section class="card"><div class="card-h"><h2>Spending by category</h2><div class="meta">${money(A.expense)}</div></div>
+      ${cats.length ? `<div class="hbars">${cats.map(([k, v]) => `<div class="hb"><span class="lab">${esc(k)}</span><span class="track"><i style="width:${(v / cmax * 100).toFixed(1)}%"></i></span><span class="v">${money(v)}</span></div>`).join('')}</div>` : '<div class="empty">Categories appear once you log expenses.</div>'}
+    </section>
+    <section class="card"><div class="card-h"><h2>Monthly income</h2><div class="meta">added automatically on the day</div></div>
+      ${inc.length ? `<div class="list">${inc.map(recRow).join('')}</div>` : '<div class="empty">Add your salary or any income that repeats every month.</div>'}
+      <details class="add" id="d-rec-income"><summary>+ Add monthly income</summary>
+        <form class="stack" data-form="rec-income" style="gap:10px">
+          <input class="inp" id="f-ri-name" placeholder="Name, e.g. Salary" required maxlength="80" autocomplete="off">
+          <div class="fields">
+            <div class="field"><label for="f-ri-amt">Amount</label><input class="inp" id="f-ri-amt" inputmode="decimal" required autocomplete="off"></div>
+            <div class="field"><label for="f-ri-cur">Currency</label><select class="inp" id="f-ri-cur">${curOpts('PLN')}</select></div>
+            <div class="field"><label for="f-ri-day">Paid on day</label><input class="inp" id="f-ri-day" inputmode="numeric" value="10" required></div>
+            <div class="field"><label for="f-ri-start">From month</label><input class="inp" id="f-ri-start" type="month" value="${t.slice(0, 7)}" required></div>
+          </div>
+          <div class="field"><label for="f-ri-cat">Category</label><select class="inp" id="f-ri-cat">${c.incomeCats.map(x => `<option>${esc(x)}</option>`).join('')}</select></div>
+          <div><button class="btn primary" type="submit">Add income</button></div>
+        </form>
+      </details>
+    </section>
+    <section class="card"><div class="card-h"><h2>Subscriptions</h2><div class="meta num">${money(subMonthly)} / month</div></div>
+      ${subs.length ? `<div class="list">${subs.map(recRow).join('')}</div>` : '<div class="empty">Add Spotify, gym membership, phone plan and other regular payments.</div>'}
+      <details class="add" id="d-rec-sub"><summary>+ Add subscription</summary>
+        <form class="stack" data-form="rec-sub" style="gap:10px">
+          <input class="inp" id="f-rs-name" placeholder="Name, e.g. Gym membership" required maxlength="80" autocomplete="off">
+          <div class="fields">
+            <div class="field"><label for="f-rs-amt">Amount</label><input class="inp" id="f-rs-amt" inputmode="decimal" required autocomplete="off"></div>
+            <div class="field"><label for="f-rs-cur">Currency</label><select class="inp" id="f-rs-cur">${curOpts('PLN')}</select></div>
+            <div class="field"><label for="f-rs-cycle">Billing</label><select class="inp" id="f-rs-cycle"><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select></div>
+            <div class="field"><label for="f-rs-day">Billed on day</label><input class="inp" id="f-rs-day" inputmode="numeric" value="1" required></div>
+            <div class="field"><label for="f-rs-start">First payment month</label><input class="inp" id="f-rs-start" type="month" value="${t.slice(0, 7)}" required></div>
+          </div>
+          <div class="field"><label for="f-rs-cat">Category</label><select class="inp" id="f-rs-cat">${c.expenseCats.map(x => `<option ${x === 'Subscriptions' ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select></div>
+          <div><button class="btn primary" type="submit">Add subscription</button></div>
+        </form>
+      </details>
+    </section>
+    <section class="card span2"><div class="card-h"><h2>Savings goals</h2><div class="meta num">${money(sum(S.sav.map(g => sum((g.contributions || []).map(x => x.pln)))))} saved in total</div></div>
+      ${S.sav.length ? `<div class="grid2">${S.sav.slice().sort((a, b) => (a.created || 0) - (b.created || 0)).map(savCard).join('')}</div>` : '<div class="empty">Create a goal, for example an emergency fund or a trip, then add money to it as you save.</div>'}
+      <details class="add" id="d-sav-new"><summary>+ New savings goal</summary>
+        <form class="stack" data-form="sav-new" style="gap:10px">
+          <input class="inp" id="f-sv-name" placeholder="Name, e.g. Emergency fund" required maxlength="80" autocomplete="off">
+          <div class="fields">
+            <div class="field"><label for="f-sv-target">Target</label><div class="unit"><input class="inp" id="f-sv-target" inputmode="decimal" required autocomplete="off"><span>zł</span></div></div>
+            <div class="field"><label for="f-sv-by">Target date (optional)</label><input class="inp" id="f-sv-by" type="month"></div>
+          </div>
+          <div><button class="btn primary" type="submit">Create goal</button></div>
+        </form>
+      </details>
+    </section>
+  </div>`;
+}
+function savCard(g) {
+  const saved = sum((g.contributions || []).map(x => x.pln)), p = g.target ? clamp(saved / g.target, 0, 1) : 0;
+  const last = (g.contributions || []).slice(-3).reverse();
+  return `<div class="card" style="box-shadow:none;background:var(--bg)">
+    <div class="card-h"><h2>${esc(g.name)}</h2><div class="meta">${g.by ? 'by ' + esc(fmtMonth(g.by)) : ''}</div>${delBtn('sav', g.id, 'Delete goal')}</div>
+    <div class="row" style="justify-content:space-between;align-items:baseline"><span class="big" style="font-size:24px">${money(saved)}</span><span class="sub num">of ${money(g.target)} · ${fmt(p * 100)}%</span></div>
+    <div class="bar"><i style="width:${p * 100}%;background:var(--good)"></i></div>
+    ${last.length ? `<div class="sub">${last.map(x => `${esc(fmtDM(x.date))}: ${x.pln < 0 ? '' : '+'}${money(x.pln)}`).join(' · ')}</div>` : ''}
+    <form class="row" data-form="sav-add" data-id="${esc(g.id)}"><div class="unit" style="flex:1 1 120px"><input class="inp" id="f-sva-${esc(g.id)}" inputmode="decimal" placeholder="Amount" autocomplete="off" aria-label="Amount to add"><span>zł</span></div><button class="btn" type="submit">Add</button></form>
+  </div>`;
+}
+
+/* ---------- views: Goals ---------- */
+function renderGoals() {
+  const lv = S.goalsUI.level, anchor = S.goalsUI.anchor || todayISO(), p = period(lv, anchor);
+  const list = goalsFor(lv, p.key), done = list.filter(g => g.done).length;
+  const pl = PARENT[lv], cands = pl ? S.goals.filter(g => g.level === pl && parentKeys(lv, p).includes(g.period)) : [];
+  const childLevel = { year: 'month', month: 'week', week: 'day' }[lv];
+  const row = g => {
+    const ch = children(g.id), par = g.parent ? S.goals.find(x => x.id === g.parent) : null, pr = goalProgress(g);
+    return `<div class="card" style="gap:10px">
+      <div class="row" style="flex-wrap:nowrap;align-items:flex-start">
+        <button class="check" style="border:0;padding:0;flex:1;min-width:0" data-act="goal-toggle" data-id="${esc(g.id)}" aria-pressed="${!!g.done}"><span class="box">${CHECK}</span><span class="ttl">${esc(g.title)}</span></button>
+        ${delBtn('goal', g.id, 'Delete goal')}
+      </div>
+      ${par ? `<div><span class="chip">Part of: ${esc(par.title)}</span></div>` : ''}
+      ${ch.length ? `<div class="row" style="flex-wrap:nowrap"><div class="bar thin" style="flex:1"><i style="width:${pr * 100}%"></i></div><span class="sub num">${ch.filter(x => x.done).length}/${ch.length} ${childLevel}ly goals</span></div><div class="sub">${ch.map(x => `${x.done ? '✓' : '○'} ${esc(x.title)}`).join(' · ')}</div>` : ''}
+    </div>`;
+  };
+  return `
+  <div class="pagehead"><div class="grow"><div class="eyebrow">Goals</div><h1 class="display">${esc(p.label)}</h1>${p.sub ? `<div class="sub">${esc(p.sub)}</div>` : ''}</div>${seg('glevel', LEVELS, lv)}</div>
+  <div class="row" style="justify-content:space-between;margin-bottom:14px">${pnav('gnav', lv === 'day' ? fmtShort(p.key) : p.label, '', false)}<span class="sub num">${done}/${list.length} done</span></div>
+  ${list.length ? `<div class="bar" style="margin-bottom:14px"><i style="width:${list.length ? done / list.length * 100 : 0}%"></i></div>` : ''}
+  <div class="grid">${list.map(row).join('') || `<div class="card"><div class="empty">No ${lv === 'day' ? 'daily' : lv + 'ly'} goals for this ${lv} yet. ${lv === 'year' ? 'Start with what you want to achieve this year, then break it into monthly goals.' : 'Add one below' + (pl ? ` and link it to a ${pl}ly goal.` : '.')}</div></div>`}
+    <form class="card" data-form="goal-new">
+      <h2>Add a ${lv === 'day' ? 'daily' : lv + 'ly'} goal</h2>
+      <input class="inp" id="f-goal-title" placeholder="${lv === 'year' ? 'e.g. Get the UEFA C licence' : lv === 'month' ? 'e.g. Finish two e-learning modules' : lv === 'week' ? 'e.g. Train 4 times' : 'e.g. Book the dentist'}" required maxlength="140" autocomplete="off">
+      ${pl ? `<div class="field"><label for="f-goal-parent">Part of ${pl}ly goal</label><select class="inp" id="f-goal-parent"><option value="">None</option>${cands.map(g => `<option value="${esc(g.id)}">${esc(g.title)}</option>`).join('')}</select></div>` : ''}
+      <div><button class="btn primary" type="submit">Add goal</button></div>
+    </form>
+  </div>`;
+}
+
+/* ---------- views: Review ---------- */
+function renderReview() {
+  const lv = S.review.level, anchor = S.review.anchor || todayISO(), p = period(lv, anchor), t = todayISO();
+  const head = `<div class="pagehead"><div class="grow"><div class="eyebrow">Review</div><h1 class="display">${esc(p.label)}</h1>${p.sub ? `<div class="sub">${esc(p.sub)}</div>` : ''}</div>${seg('rlevel', LEVELS, lv)}</div>
+  <div class="row" style="margin-bottom:14px">${pnav('rnav', lv === 'day' ? fmtShort(p.key) : lv === 'week' ? `W${weekNo(p.start)}` : lv === 'month' ? fmtMonShort(p.key) + ' ' + p.key.slice(0, 4) : p.key, '', p.end >= t)}${p.start > t || p.end < t ? `<button class="btn small" data-act="r-today">Current ${lv}</button>` : ''}</div>`;
+  if (p.start > t) return head + `<div class="card"><div class="empty">This ${lv} hasn't started yet.</div></div>`;
+  return head + (lv === 'day' ? reviewDay(p.key) : reviewPeriod(lv, p));
+}
+function reviewDay(d) {
+  const doc = day(d), sl = doc.sleep || {}, c = cfg(), hs = activeHabits(d), hv = doc.habits || {}, wo = doc.workouts || [];
+  const txs = S.tx.filter(x => x.date === d), dg = goalsFor('day', d), prevW = lastWeightBefore(d);
+  const inc = sum(txs.filter(x => x.kind === 'income').map(x => x.pln)), exp = sum(txs.filter(x => x.kind === 'expense').map(x => x.pln));
+  const tracked = d >= c.start;
+  return `<div class="tiles">
+    ${tile('Sleep Score', sl.score != null ? `${fmt(sl.score)}<small>/100</small>` : '–', sl.score != null ? scorePill(sl.score) : 'Not logged')}
+    ${tile('Sleep', fmtDur(sleepMin(sl)), sl.bed && sl.wake ? `${esc(sl.bed)} → ${esc(sl.wake)}` : 'Times not logged')}
+    ${tile('Weight', doc.weight != null ? `${fmt(doc.weight, 1)}<small>kg</small>` : '–', doc.weight != null && prevW != null ? deltaHTML(doc.weight, prevW, ' kg', 1, true, 'vs last weigh-in') : '')}
+    ${tile('Calories', doc.kcal != null ? `${fmt(doc.kcal)}<small>kcal</small>` : '–', doc.kcal != null ? (doc.kcal >= c.kcalTarget ? 'Target reached' : `${fmt(c.kcalTarget - doc.kcal)} under target`) + (doc.protein != null ? ` · ${fmt(doc.protein)} g protein` : '') : 'Not logged')}
+  </div>
+  <div class="grid2" style="margin-top:14px">
+    <section class="card"><div class="card-h"><h2>Habits</h2><div class="meta num">${tracked ? `${hs.filter(h => hv[h.id]).length}/${hs.length}` : 'before tracking started'}</div></div>
+      <div class="list">${hs.map(h => `<div class="li"><span class="pill" style="width:64px">${hv[h.id] ? `<span style="color:var(--good-text)">✓ Done</span>` : `<span style="color:var(--crit-text)">✗ Missed</span>`}</span><div class="main-t"><div class="t">${esc(h.name)}</div></div></div>`).join('')}</div>
+    </section>
+    <section class="card"><div class="card-h"><h2>Goals</h2><div class="meta num">${dg.filter(g => g.done).length}/${dg.length}</div></div>
+      ${dg.length ? `<div class="list">${dg.map(g => `<div class="li"><span class="pill" style="width:64px">${g.done ? `<span style="color:var(--good-text)">✓ Done</span>` : `<span style="color:var(--crit-text)">✗ Open</span>`}</span><div class="main-t"><div class="t">${esc(g.title)}</div></div></div>`).join('')}</div>` : '<div class="empty">No goals were set for this day.</div>'}
+    </section>
+    <section class="card"><div class="card-h"><h2>Training</h2><div class="meta">${wo.length ? `${fmt(sum(wo.map(w => w.min)))} min` : ''}</div></div>
+      ${wo.length ? `<div class="list">${wo.map(w => `<div class="li"><i class="dot" style="background:${wType(w.type).color}"></i><div class="main-t"><div class="t">${esc(wType(w.type).name)}</div><div class="s">${fmt(w.min)} min${w.kcal ? ` · ${fmt(w.kcal)} kcal` : ''}${w.note ? ` · ${esc(w.note)}` : ''}</div></div></div>`).join('')}</div>` : '<div class="empty">Rest day.</div>'}
+    </section>
+    <section class="card"><div class="card-h"><h2>Money</h2><div class="meta num">in ${money(inc)} · out ${money(exp)}</div></div>
+      ${txs.length ? `<div class="list">${txs.map(x => `<div class="li"><div class="main-t"><div class="t">${esc(x.note || x.category)}</div><div class="s">${esc(x.category || '')}</div></div><div class="amt ${x.kind === 'income' ? 'in' : ''}">${x.kind === 'income' ? '+' : '−'}${money(x.pln)}</div></div>`).join('')}</div>` : '<div class="empty">No money in or out.</div>'}
+    </section>
+  </div>
+  <div style="margin-top:14px"><button class="btn" data-act="edit-day" data-d="${d}">Edit this day</button></div>`;
+}
+function habitHeat(start, end, opts = {}) {
+  const t = todayISO(), c = cfg(), first = mondayOf(start); let cells = '';
+  ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].forEach(w => cells += `<div class="wd">${w}</div>`);
+  for (let d = first; d <= end || ((parse(d).getDay() + 6) % 7) !== 0; d = addDays(d, 1)) {
+    if (d < start || d > end) { cells += '<div></div>'; continue; }
+    if (d > t) { cells += `<div class="mcell future">${parse(d).getDate()}</div>`; continue; }
+    const st = d >= c.start ? dayHabitStat(d) : { pct: null }, p = st.pct;
+    const wo = (day(d).workouts || []).length;
+    cells += `<button class="mcell ${d === t ? 'today' : ''}" data-act="open-day" data-d="${d}" style="background:${heatColor(p)};color:${heatInk(p)}" title="${esc(fmtShort(d))}${p != null ? ` · habits ${Math.round(p * 100)}%` : ''}" aria-label="${esc(fmtShort(d))}${p != null ? `, habits ${Math.round(p * 100)} percent` : ''}"><span>${parse(d).getDate()}</span>${wo ? `<span class="dots">${'<i style="background:currentColor"></i>'.repeat(Math.min(wo, 3))}</span>` : ''}</button>`;
+  }
+  return `<div class="mgrid">${cells}</div><div class="row" style="justify-content:space-between;margin-top:8px"><div class="heat-legend">Habits <i style="background:${heatColor(0)}"></i>0% <i style="background:${heatColor(.5)}"></i><i style="background:${heatColor(1)}"></i>100%</div><span class="sub">Dots = training sessions. Tap a day for details.</span></div>`;
+}
+function reviewPeriod(lv, p) {
+  const A = agg(p.start, p.end), pp = prevPeriod(lv, p), P = agg(pp.start, pp.end), c = cfg(), t = todayISO();
+  const goals = goalsFor(lv, p.key);
+  const cats = Object.entries(A.byCat).sort((a, b) => b[1] - a[1]); const cmax = cats.length ? cats[0][1] : 1;
+  const habits = Object.entries(A.perHabit);
+  const prevName = { week: 'last week', month: 'last month', year: 'last year' }[lv];
+  let habitDetail = '';
+  if (lv === 'week') {
+    const ds = []; for (let i = 0; i < 7; i++) ds.push(addDays(p.start, i));
+    habitDetail = `<div class="list">${activeHabits(p.end < t ? p.end : t).concat(cfg().habits.filter(h => h.to && h.to > p.start && !activeHabits(p.end < t ? p.end : t).includes(h))).map(h => { const ph = A.perHabit[h.id] || { done: 0, total: 0 }; return `<div class="li"><div class="main-t"><div class="t">${esc(h.name)}</div><div class="s num">${ph.done}/${ph.total} days · best streak ${habitStreak(h.id, p.end < t ? p.end : t).best}</div></div><div class="wdots">${ds.map(d => { const act = activeHabits(d).some(x => x.id === h.id); if (d > t || d < c.start || !act) return `<i class="na" title="${esc(fmtShort(d))}"></i>`; const on = !!(day(d).habits || {})[h.id]; return `<i class="${on ? 'on' : ''}" title="${esc(fmtShort(d))}: ${on ? 'done' : 'missed'}">${on ? '✓' : ''}</i>`; }).join('')}</div></div>`; }).join('')}</div>`;
+  } else {
+    habitDetail = habits.length ? `<div class="hbars">${habits.map(([id, h]) => `<div class="hb"><span class="lab">${esc(h.name)}</span><span class="track" style="background:var(--surface-2);border-radius:4px"><i style="width:${h.total ? h.done / h.total * 100 : 0}%;background:var(--accent)"></i></span><span class="v">${h.done}/${h.total}</span></div>`).join('')}</div>` : '<div class="empty">No habit data in this period.</div>';
+  }
+  let extra = '';
+  if (lv === 'month') {
+    const dates = []; for (let d = p.start; d <= (p.end < t ? p.end : t); d = addDays(d, 1)) dates.push(d);
+    extra = `<section class="card span2"><div class="card-h"><h2>Every day this month</h2></div>${habitHeat(p.start, p.end)}</section>
+      <section class="card span2"><div class="card-h"><h2>Weight</h2><div class="meta">kg</div></div>${chartSlot('r-weight', { title: 'Weight', labels: dates, height: 190, series: [{ name: 'Morning weight', type: 'dots', color: 'var(--muted)', values: dates.map(d => day(d).weight), fmt: v => fmt(v, 1) + ' kg' }, { name: '7-day average', type: 'line', color: 'var(--accent)', values: dates.map(weightAvg7), fmt: v => fmt(v, 1) + ' kg' }] })}</section>`;
+  }
+  if (lv === 'year') {
+    const months = []; for (let m = 1; m <= 12; m++) months.push(`${p.key}-${pad(m)}`);
+    const rows = months.map(mk => { if (mk + '-01' > t) return null; const M = agg(mk + '-01', monthEnd(mk)); return { mk, M }; }).filter(Boolean);
+    const weeks = []; for (let w = mondayOf(p.start); w <= (p.end < t ? p.end : t); w = addDays(w, 7)) weeks.push(w);
+    extra = `<section class="card span2"><div class="card-h"><h2>Weight through the year</h2><div class="meta">weekly average, kg</div></div>${chartSlot('r-yweight', { title: 'Weight through the year', labels: weeks, height: 200, tipLabel: s => 'Week of ' + fmtDM(s), series: [{ name: 'Weekly average', type: 'line', color: 'var(--accent)', values: weeks.map(w => { const v = []; for (let i = 0; i < 7; i++) { const x = day(addDays(w, i)).weight; if (x != null) v.push(x); } return avg(v); }), fmt: v => fmt(v, 1) + ' kg' }] })}</section>
+    <section class="card span2"><div class="card-h"><h2>Month by month</h2></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Month</th><th>Weight</th><th>Sleep Score</th><th>Sleep</th><th>Training</th><th>Habits</th><th>Income</th><th>Expenses</th><th>Invested</th><th>Left</th></tr></thead><tbody>
+    ${rows.map(({ mk, M }) => `<tr><td><button class="btn small ghost" data-act="open-month" data-m="${mk}">${esc(fmtMonShort(mk))}</button></td><td>${M.weight != null ? fmt(M.weight, 1) : '–'}</td><td>${M.sleepScore != null ? fmt(M.sleepScore) : '–'}</td><td>${fmtDur(M.sleepMin)}</td><td>${M.sessions}</td><td>${M.habitPct != null ? fmt(M.habitPct * 100) + '%' : '–'}</td><td>${money(M.income)}</td><td>${money(M.expense)}</td><td>${money(M.invested)}</td><td>${money(M.left)}</td></tr>`).join('')}
+    </tbody></table></div></section>`;
+  }
+  return `<div class="tiles">
+    ${tile('Sleep Score, avg', A.sleepScore != null ? `${fmt(A.sleepScore)}<small>/100</small>` : '–', deltaHTML(A.sleepScore, P.sleepScore, '', 0, true, 'vs ' + prevName) || `${A.sleepN} nights logged`)}
+    ${tile('Sleep, avg', fmtDur(A.sleepMin), A.sleepMin != null && P.sleepMin != null ? deltaHTML(A.sleepMin, P.sleepMin, ' min', 0, true, 'vs ' + prevName) : `${A.sleepN} nights logged`)}
+    ${tile('Weight, avg', A.weight != null ? `${fmt(A.weight, 1)}<small>kg</small>` : '–', deltaHTML(A.weight, P.weight, ' kg', 1, true, 'vs ' + prevName) || `${A.weightN} weigh-ins`)}
+    ${tile('Calories, avg', A.kcal != null ? `${fmt(A.kcal)}<small>kcal</small>` : '–', `${A.kcalOn}/${A.kcalN} days at ${fmt(c.kcalTarget)}+`)}
+    ${tile('Habits', A.habitPct != null ? `${fmt(A.habitPct * 100)}<small>%</small>` : '–', A.habitPct != null && P.habitPct != null ? deltaHTML(A.habitPct * 100, P.habitPct * 100, ' pts', 0, true, 'vs ' + prevName) : `${A.habitDays} days tracked`)}
+    ${tile('Training', `${A.sessions}<small>sessions</small>`, `${fmtDur(A.trainMin)} · ${fmt(A.trainKcal)} kcal burned`)}
+    ${tile('Income', `<span class="delta-up">${money(A.income)}</span>`, '')}
+    ${tile('Expenses', money(A.expense), P.expense ? deltaHTML(A.expense, P.expense, ' zł', 0, false, 'vs ' + prevName) : '')}
+    ${tile('Saved', money(A.saved), '')}
+    ${tile('Invested', money(A.invested), '')}
+    ${tile('Left', money(A.left), 'after expenses, savings, investments')}
+  </div>
+  <div class="grid2" style="margin-top:14px">
+    <section class="card"><div class="card-h"><h2>Habits</h2><div class="meta num">${A.habitPct != null ? fmt(A.habitPct * 100) + '% done' : ''}</div></div>${habitDetail}</section>
+    <section class="card"><div class="card-h"><h2>${esc(p.label)} goals</h2><div class="meta num">${goals.filter(g => g.done).length}/${goals.length}</div></div>
+      ${goals.length ? `<div class="list">${goals.map(g => `<div class="li"><span class="pill" style="width:64px">${g.done ? `<span style="color:var(--good-text)">✓ Done</span>` : `<span style="color:var(--muted)">${fmt(goalProgress(g) * 100)}%</span>`}</span><div class="main-t"><div class="t">${esc(g.title)}</div></div></div>`).join('')}</div>` : `<div class="empty">No ${lv}ly goals were set.</div>`}
+      <div><button class="btn small" data-act="goto-goals" data-level="${lv}" data-d="${p.start}">Open goals</button></div>
+    </section>
+    <section class="card"><div class="card-h"><h2>Training</h2><div class="meta">${A.sessions} sessions</div></div>
+      <div class="list">${WORKOUTS.map(w => `<div class="li"><i class="dot" style="background:${w.color}"></i><div class="main-t"><div class="t">${w.name}</div></div><span class="amt">${A.byType[w.id].n}</span><span class="sub num" style="width:70px;text-align:right">${fmtDur(A.byType[w.id].min)}</span></div>`).join('')}</div>
+    </section>
+    <section class="card"><div class="card-h"><h2>Spending by category</h2><div class="meta num">${money(A.expense)}</div></div>
+      ${cats.length ? `<div class="hbars">${cats.map(([k, v]) => `<div class="hb"><span class="lab">${esc(k)}</span><span class="track"><i style="width:${(v / cmax * 100).toFixed(1)}%"></i></span><span class="v">${money(v)}</span></div>`).join('')}</div>` : '<div class="empty">No expenses in this period.</div>'}
+    </section>
+    ${extra}
+  </div>`;
+}
+
+/* ---------- Google Calendar ---------- */
+const AUTHZ = ['needs_reauth', 'server_not_connected', 'blocked_by_policy', 'approval_required', 'not_in_manifest', 'selection_required'];
+const CAL_COLORS = ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s4)', 'var(--s5)', 'var(--s6)', 'var(--s7)', 'var(--s8)'];
+function loadCalendars() {
+  if (!S.mcp) return;
+  S.mcp.callTool(CAL, 'list_calendars', { pageSize: 250 }, { cache: { staleTime: 300000 } }).then(r => {
+    const cs = (r.payload && r.payload.calendars) || [];
+    S.calendars = cs.filter(c => c && c.id).map((c, i) => ({ id: c.id, name: c.summaryOverride || c.summary || c.id, color: CAL_COLORS[i % CAL_COLORS.length] }));
+    S.calListErr = null; S.cal.day.key = null; S.cal.range.key = null; scheduleRender();
+  }).catch(e => { S.calListErr = e; scheduleRender(); });
+}
+function visibleCals() { const hid = new Set(cfg().hiddenCals || []); return (S.calendars || []).filter(c => !hid.has(c.id)); }
+function normEvents(payload, cal) {
+  const evs = (payload && payload.events) || [];
+  return evs.filter(e => e && e.status !== 'cancelled' && e.start).map(e => {
+    const allDay = !!e.start.date;
+    const st = allDay ? parse(e.start.date) : new Date(e.start.dateTime);
+    const en = allDay ? parse((e.end && e.end.date) || e.start.date) : new Date((e.end && e.end.dateTime) || e.start.dateTime);
+    return { id: e.id, title: e.summary || '(No title)', allDay, start: st, end: en, link: e.htmlLink, loc: e.location, cal, recurring: !!e.recurringEventId };
+  });
+}
+function watchCal(slot, start, endExcl) {
+  if (!S.mcp || !S.calendars) return;
+  const C = S.cal[slot], cals = visibleCals(), key = `${start}|${endExcl}|${cals.map(c => c.id).join(',')}`;
+  if (C.key === key) return;
+  (C.unsubs || []).forEach(u => u());
+  Object.assign(C, { key, start, end: endExcl, cals, byCal: {}, errs: {}, stale: {}, inputs: {}, unsubs: [] });
+  cals.forEach(cal => {
+    const input = { calendarId: cal.id, startTime: `${start}T00:00:00`, endTime: `${endExcl}T00:00:00`, orderBy: 'startTime', pageSize: 250 };
+    C.inputs[cal.id] = input;
+    C.unsubs.push(S.mcp.watchTool(CAL, CAL_TOOL, input, ev => {
+      if (C.key !== key) return;
+      if (ev.type === 'data') { const pl = ev.result && ev.result.payload; if (pl && pl.accessRole) S.calRole[cal.id] = pl.accessRole; C.byCal[cal.id] = normEvents(pl, cal); delete C.errs[cal.id]; C.stale[cal.id] = false; }
+      else {
+        const code = ev.error && ev.error.code;
+        if (AUTHZ.includes(code)) { delete C.byCal[cal.id]; C.errs[cal.id] = ev.error; }
+        else if (C.byCal[cal.id]) C.stale[cal.id] = true; else C.errs[cal.id] = ev.error;
+      }
+      scheduleRender();
+    }, { cache: { staleTime: 60000 }, refetchInterval: 600000 }));
+  });
+}
+function calState(slot) {
+  if (!S.mcp) return { kind: 'nomcp' };
+  if (S.calListErr) return { kind: 'err', err: S.calListErr };
+  const C = S.cal[slot];
+  if (!S.calendars || !C.cals) return { kind: 'loading' };
+  if (!C.cals.length) return { kind: 'none' };
+  const loaded = C.cals.filter(c => C.byCal[c.id]), errIds = C.cals.filter(c => C.errs[c.id]);
+  if (!loaded.length) return errIds.length === C.cals.length ? { kind: 'err', err: C.errs[errIds[0].id] } : { kind: 'loading' };
+  const seen = new Set(), events = [];
+  loaded.flatMap(c => C.byCal[c.id]).filter(e => !S.evHidden.has(`${e.cal.id}|${e.id}`)).sort((a, b) => a.start - b.start).forEach(e => { const k = `${e.id}|${+e.start}`; if (!seen.has(k)) { seen.add(k); events.push(e); } });
+  return { kind: 'ok', events, failed: errIds.map(c => c.name), stale: C.cals.some(c => C.stale[c.id]) };
+}
+function calRetry(slot) {
+  if (!S.mcp) return;
+  if (S.calListErr || !S.calendars) { S.calListErr = null; loadCalendars(); render(); return; }
+  const C = S.cal[slot], key = C.key; if (!C.inputs) return;
+  const ids = Object.keys(C.errs || {}).length ? Object.keys(C.errs) : Object.keys(C.inputs);
+  C.errs = {}; render();
+  ids.forEach(id => {
+    const cal = (C.cals || []).find(c => c.id === id); if (!cal) return;
+    S.mcp.callTool(CAL, CAL_TOOL, C.inputs[id], { cache: { refresh: true } })
+      .then(r => { if (r.payload && r.payload.accessRole) S.calRole[id] = r.payload.accessRole; if (C.key === key) { C.byCal[id] = normEvents(r.payload, cal); C.stale[id] = false; } })
+      .catch(e => { if (C.key === key) C.errs[id] = e; })
+      .finally(() => scheduleRender());
+  });
+}
+function calErrHTML(slot, e) {
+  const code = e && e.code;
+  if (code === 'needs_reauth') return `<div class="notice">Sign in with Google to see your events. <button class="btn small primary" data-act="lt-signin">Sign in</button></div>`;
+  const m = {
+    server_not_connected: 'Google Calendar is not connected. Add it in claude.ai Settings → Connectors, then reload this page.',
+    needs_reauth: 'Google Calendar needs to be reconnected. Reconnect it in claude.ai Settings → Connectors.',
+    not_in_manifest: 'Calendar access is turned off for this page. Allow Google Calendar in this page\'s permissions.',
+    selection_required: 'Choose which Google Calendar connection this page should use in the prompt Claude shows.',
+    blocked_by_policy: 'Your organization does not allow calendar access here.',
+    not_granted: 'Your events show here when the page is opened in Claude.',
+    capability_disabled: 'Your events show here when the page is opened in Claude.',
+    capability_removed: 'Your events show here when the page is opened in Claude.'
+  }[code];
+  if (code === 'approval_required') return `<div class="notice">Google Calendar needs your approval for this page. <button class="btn small primary" data-act="cal-retry" data-slot="${slot}">Allow and load events</button></div>`;
+  if (m) return `<div class="notice">${esc(m)}</div>`;
+  return `<div class="notice">Your calendar could not be loaded right now. <button class="btn small" data-act="cal-retry" data-slot="${slot}">Try again</button></div>`;
+}
+function calStatusExtra(slot, st) {
+  if (st.kind !== 'ok') return '';
+  if (st.failed.length) return `<div class="sub">Couldn't load ${esc(st.failed.join(', '))}. <button class="btn small ghost" data-act="cal-retry" data-slot="${slot}">Try again</button></div>`;
+  if (st.stale) return `<div class="sub">Showing the last loaded events. <button class="btn small ghost" data-act="cal-retry" data-slot="${slot}">Refresh</button></div>`;
+  return '';
+}
+function calLegend() {
+  if (!S.calendars || !S.calendars.length) return '';
+  const hid = new Set(cfg().hiddenCals || []);
+  return `<div class="cats">${S.calendars.map(c => { const on = !hid.has(c.id); return `<button class="chip" data-act="cal-toggle" data-id="${esc(c.id)}" aria-pressed="${on}" style="${on ? '' : 'opacity:.5;text-decoration:line-through'}"><i class="dot" style="background:${c.color}"></i>${esc(c.name)}</button>`; }).join('')}</div>`;
+}
+const evTime = e => e.allDay ? 'All day' : hm(e.start);
+function canWrite(id) { const r = S.calRole[id]; if (r) return r === 'owner' || r === 'writer'; return !/#holiday@|@import\.calendar\.google\.com$/.test(id); }
+const evDel = e => { if (!S.mcp || !canWrite(e.cal.id)) return ''; const id = `${e.cal.id}|${e.id}`; return S.confirm === `ev:${id}` ? `<button class="confirm" data-act="del" data-kind="ev" data-id="${esc(id)}">${e.recurring ? 'Delete this one' : 'Confirm delete'}</button>` : `<button class="x" data-act="del" data-kind="ev" data-id="${esc(id)}" aria-label="Delete event">×</button>`; };
+const evTitle = e => e.link ? `<a class="nm" href="${esc(e.link)}" target="_blank" rel="noopener">${esc(e.title)}</a>` : `<span class="nm">${esc(e.title)}</span>`;
+const evRow = e => `<div class="event" style="border-left:3px solid ${e.cal.color}"><span class="tm">${evTime(e)}</span><span style="min-width:0">${evTitle(e)}<br><span class="lc">${!e.allDay ? `${hm(e.start)}–${hm(e.end)} · ` : ''}${esc(e.cal.name)}${e.loc ? ' · ' + esc(e.loc) : ''}</span></span>${evDel(e)}</div>`;
+const evCard = e => `<div class="event ev-c" style="border-left:3px solid ${e.cal.color}"><span class="tm">${e.allDay ? 'All day' : `${hm(e.start)}–${hm(e.end)}`}</span>${evTitle(e)}<span class="lc">${esc(e.cal.name)}${e.loc ? ' · ' + esc(e.loc) : ''}</span>${evDel(e) ? `<span style="align-self:flex-end">${evDel(e)}</span>` : ''}</div>`;
+function evList(list) {
+  const allDay = list.filter(e => e.allDay), timed = list.filter(e => !e.allDay).sort((a, b) => a.start - b.start);
+  const groups = []; if (allDay.length) groups.push(allDay);
+  let cur = null, curEnd = 0;
+  timed.forEach(e => { const end = Math.max(+e.end, +e.start + 60000); if (cur && +e.start < curEnd) { cur.push(e); curEnd = Math.max(curEnd, end); } else { cur = [e]; groups.push(cur); curEnd = end; } });
+  return `<div class="events">${groups.map(g => g.length === 1 ? evRow(g[0]) : `<div><div class="evgroup-h">${g[0].allDay ? 'All day' : `At the same time · ${hm(g[0].start)}–${hm(new Date(Math.max(...g.map(x => +x.end))))}`}</div><div class="evgroup">${g.map(evCard).join('')}</div></div>`).join('')}</div>`;
+}
+function eventsOn(list, d) { const s = parse(d), e = parse(addDays(d, 1)); return (list || []).filter(x => x.start < e && x.end > s || +x.start === +s); }
+function calBlock(slot, d) {
+  const st = calState(slot);
+  if (st.kind === 'nomcp') return `<div class="notice">Sign in with Google to see your events.</div>`;
+  if (st.kind === 'err') return calErrHTML(slot, st.err);
+  if (st.kind === 'none') return `<div class="notice">All calendars are hidden. Choose which to show in Settings.</div>`;
+  if (st.kind === 'loading') return `<div class="empty">Loading events…</div>`;
+  const ev = eventsOn(st.events, d);
+  return (ev.length ? evList(ev) : `<div class="empty">No events ${d === todayISO() ? 'today' : 'on this day'}.</div>`) + calStatusExtra(slot, st);
+}
+function refreshCal() {
+  if (!S.mcp) return;
+  S.mcp.invalidate(CAL, CAL_TOOL).catch(() => { calRetry('day'); if (S.tab === 'calendar') calRetry('range'); });
+}
+function calWriteMsg(e, verb) {
+  const c = e && e.code;
+  return c === 'approval_required' ? `Google Calendar needs your approval to ${verb} events. Try again and choose Allow.`
+    : c === 'not_in_manifest' ? 'Calendar editing is turned off for this page. Allow Google Calendar in the page permissions.'
+    : c === 'needs_reauth' ? 'Your Google sign-in expired. Tap "Sign in to sync" at the top, then try again.'
+    : c === 'server_not_connected' ? 'Google Calendar is not connected. Add it in claude.ai Settings → Connectors.'
+    : c === 'tool_error' ? `Google Calendar refused this: ${e.message || 'unknown error'}`
+    : (c === 'server_unavailable' || c === 'upstream_error') ? `Couldn't confirm the event was ${verb === 'add' ? 'added' : 'deleted'}. Your calendar is refreshing, so check it before trying again.`
+    : `Couldn't ${verb} the event.`;
+}
+function deleteEvent(compound) {
+  const i = compound.indexOf('|'), calId = compound.slice(0, i), evId = compound.slice(i + 1);
+  S.evHidden.add(compound); render();
+  S.mcp.callTool(CAL, 'delete_event', { calendarId: calId, eventId: evId })
+    .then(() => { toast('Event deleted'); refreshCal(); })
+    .catch(e => { S.evHidden.delete(compound); toast(calWriteMsg(e, 'delete'), 5000); refreshCal(); scheduleRender(); });
+}
+function newEventSheet(date) {
+  const now = new Date(), isToday = date === todayISO();
+  const h = isToday ? Math.min(now.getHours() + 1, 22) : 18;
+  S.sheet = { type: 'event', date, start: `${pad(h)}:00`, end: `${pad(h + 1)}:00`, allDay: false };
+  renderSheet(); setTimeout(() => { const f = $('#f-ev-title'); f && f.focus(); }, 30);
+}
+function calRange() {
+  const v = S.calUI.view, a = S.calUI.anchor || todayISO();
+  if (v === 'week') { const s = mondayOf(a); return { start: s, end: addDays(s, 7), label: `Week ${weekNo(s)}`, sub: `${fmtDM(s)} – ${fmtDM(addDays(s, 6))}` }; }
+  const mk = a.slice(0, 7), s = mondayOf(mk + '-01'); let e = addDays(monthEnd(mk), 1); while ((parse(e).getDay() + 6) % 7 !== 0) e = addDays(e, 1);
+  return { start: s, end: e, label: fmtMonth(mk), mk };
+}
+function renderCalendar() {
+  const r = calRange(), t = todayISO(), sel = S.calUI.sel || t, st = calState('range'), c = cfg();
+  const head = `<div class="pagehead"><div class="grow"><div class="eyebrow">Calendar</div><h1 class="display">${esc(r.label)}</h1>${r.sub ? `<div class="sub">${esc(r.sub)}</div>` : ''}</div>${seg('cview', [['month', 'Month'], ['week', 'Week']], S.calUI.view)}</div>
+  <div class="row" style="margin-bottom:14px">${pnav('cnav', S.calUI.view === 'week' ? `W${weekNo(r.start)}` : fmtMonShort(r.mk) + ' ' + r.mk.slice(0, 4), '', false)}<button class="btn small" data-act="c-today">Today</button>${S.mcp && S.calendars ? `<button class="btn small primary" data-act="ev-new" data-d="${S.calUI.sel || t}">+ Event</button>` : ''}</div><div style="margin-bottom:14px">${calLegend()}</div>`;
+  let status = '';
+  if (st.kind === 'nomcp') status = `<div class="notice">Sign in with Google to see your events.</div>`;
+  else if (st.kind === 'err') status = calErrHTML('range', st.err);
+  else if (st.kind === 'none') status = `<div class="notice">All calendars are hidden. Tap a calendar above to show it.</div>`;
+  else if (st.kind === 'loading') status = `<div class="empty">Loading events…</div>`;
+  else status = calStatusExtra('range', st);
+  const evs = st.kind === 'ok' ? st.events : [], hasEv = st.kind === 'ok';
+  const marks = d => { if (d > t || d < c.start) return ''; const st = dayHabitStat(d), wo = (day(d).workouts || []).length; return `<span style="display:flex;gap:4px;align-items:center;margin-top:auto">${st.pct != null ? `<i title="Habits ${Math.round(st.pct * 100)}%" style="width:16px;height:4px;border-radius:2px;background:${heatColor(st.pct)};display:inline-block"></i>` : ''}${wo ? `<i class="dot" style="width:6px;height:6px;background:var(--ink-2)" title="${wo} training"></i>` : ''}</span>`; };
+  if (S.calUI.view === 'week') {
+    const days = []; for (let i = 0; i < 7; i++) days.push(addDays(r.start, i));
+    return head + status + `<div class="grid">${days.map(d => { const ev = eventsOn(evs, d), st = d <= t && d >= c.start ? dayHabitStat(d) : null, wo = day(d).workouts || []; return `<section class="card" style="gap:8px"><div class="card-h"><h2 style="${d === t ? 'color:var(--accent-text)' : ''}">${esc(fmtLong(d))}</h2><div class="meta">${st && st.total ? `Habits ${st.done}/${st.total}` : ''}${wo.length ? ` · ${wo.map(w => wType(w.type).name).join(', ')}` : ''}</div></div>${hasEv ? (ev.length ? evList(ev) : '<div class="empty">No events.</div>') : ''}</section>`; }).join('')}</div>`;
+  }
+  let cells = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(w => `<div class="wd">${w}</div>`).join('');
+  for (let d = r.start; d < r.end; d = addDays(d, 1)) {
+    const ev = eventsOn(evs, d), out = d.slice(0, 7) !== r.mk;
+    cells += `<button class="mcell ${out ? 'out' : ''} ${d === t ? 'today' : ''} ${d === sel ? 'sel' : ''}" data-act="c-sel" data-d="${d}" aria-label="${esc(fmtShort(d))}, ${ev.length} events"><span>${parse(d).getDate()}</span>${ev.slice(0, 3).map(e => `<span class="ev" style="border-left:3px solid ${e.cal.color}">${e.allDay ? '' : hm(e.start) + ' '}${esc(e.title)}</span>`).join('')}${ev.length > 3 ? `<span class="ev" style="background:none;color:var(--muted)">+${ev.length - 3} more</span>` : ''}${ev.length ? `<span class="dots">${ev.map(e => `<i style="background:${e.cal.color}"></i>`).join('')}</span>` : ''}${marks(d)}</button>`;
+  }
+  const sev = eventsOn(evs, sel), sst = sel <= t && sel >= c.start ? dayHabitStat(sel) : null;
+  return head + status + `<section class="card cal">${'<div class="mgrid">' + cells + '</div>'}<div class="row" style="justify-content:space-between"><div class="heat-legend"><i style="width:16px;height:4px;background:${heatColor(1)}"></i>Habits done <i class="dot" style="width:6px;height:6px;background:var(--ink-2)"></i>Training</div></div></section>
+  <section class="card" style="margin-top:14px"><div class="card-h"><h2>${esc(fmtLong(sel))}</h2><div class="meta">${sst && sst.total ? `Habits ${sst.done}/${sst.total}` : ''}</div></div>${hasEv ? (sev.length ? evList(sev) : '<div class="empty">No events on this day.</div>') : ''}<div><button class="btn small" data-act="open-day" data-d="${sel}">Open day summary</button></div></section>`;
+}
+
+/* ---------- sheets ---------- */
+function renderSheet() {
+  const el = $('#sheet'), keep = {};
+  el.querySelectorAll('input[id], select[id]').forEach(x => { if (x.dataset.setting || x.dataset.habitName || x.type === 'checkbox') return; if (x.value !== x.defaultValue) keep[x.id] = x.value; });
+  renderSheetInner();
+  for (const id in keep) { const x = document.getElementById(id); if (x && el.contains(x)) x.value = keep[id]; }
+}
+function renderSheetInner() {
+  const el = $('#sheet'), sh = S.sheet;
+  if (!sh) { el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  const c = cfg();
+  const close = `<button class="icon-btn" data-act="sheet-close" aria-label="Close"><svg viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>`;
+  if (sh.type === 'event') {
+    const cals = (S.calendars || []).filter(x => canWrite(x.id));
+    const def = sh.cal || S.lastCal || ((cals.find(x => /@gmail\.com$/.test(x.id)) || cals[0] || {}).id);
+    el.innerHTML = `<div class="sheet-card" role="dialog" aria-modal="true" aria-label="Add event">
+      <div class="sheet-h"><h2 style="font-size:20px">Add event</h2>${close}</div>
+      ${cals.length ? `<form class="stack" data-form="event">
+        <div class="field"><label for="f-ev-title">Title</label><input class="inp" id="f-ev-title" required maxlength="200" autocomplete="off" placeholder="e.g. Gym, legs"></div>
+        <div class="field"><label for="f-ev-cal">Calendar</label><select class="inp" id="f-ev-cal">${cals.map(x => `<option value="${esc(x.id)}" ${x.id === def ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>
+        <div class="fields">
+          <div class="field"><label for="f-ev-date">Date</label><input class="inp" id="f-ev-date" type="date" value="${sh.date}" required></div>
+          ${sh.allDay ? '' : `<div class="field"><label for="f-ev-start">Starts</label><input class="inp" id="f-ev-start" type="time" value="${sh.start}" required></div><div class="field"><label for="f-ev-end">Ends</label><input class="inp" id="f-ev-end" type="time" value="${sh.end}" required></div>`}
+        </div>
+        <label class="row" style="gap:8px;font-weight:600;font-size:14px" for="f-ev-allday"><input type="checkbox" id="f-ev-allday" ${sh.allDay ? 'checked' : ''}> All-day event</label>
+        <div class="field"><label for="f-ev-loc">Location (optional)</label><input class="inp" id="f-ev-loc" maxlength="200" autocomplete="off"></div>
+        <div><button class="btn primary" type="submit" ${sh.saving ? 'disabled' : ''}>${sh.saving ? 'Saving…' : 'Add to calendar'}</button></div>
+      </form>` : '<div class="notice">None of your calendars accept new events from here.</div>'}</div>`;
+    return;
+  }
+  if (sh.type === 'tx') {
+    const inc = sh.kind === 'income', cats = inc ? c.incomeCats : c.expenseCats;
+    el.innerHTML = `<div class="sheet-card" role="dialog" aria-modal="true" aria-label="${inc ? 'Add income' : 'Add expense'}">
+      <div class="sheet-h"><h2 style="font-size:20px">${inc ? 'Add income' : 'Add expense'}</h2>${close}</div>
+      ${seg('tx-kind', [['expense', 'Expense'], ['income', 'One-time income']], sh.kind)}
+      <form class="stack" data-form="tx">
+        <div class="fields">
+          <div class="field"><label for="f-tx-amt">Amount</label><input class="inp" id="f-tx-amt" inputmode="decimal" required autocomplete="off" placeholder="0.00"></div>
+          <div class="field"><label for="f-tx-cur">Currency</label><select class="inp" id="f-tx-cur">${CURRENCIES.map(x => `<option>${x}</option>`).join('')}</select></div>
+          <div class="field"><label for="f-tx-date">Date</label><input class="inp" id="f-tx-date" type="date" value="${sh.date}" max="${todayISO()}" required></div>
+        </div>
+        <div class="field"><span class="flabel">Category</span><div class="cats" role="group">${cats.map((x, i) => `<button type="button" class="chip" data-act="tx-cat" data-v="${esc(x)}" aria-pressed="${(sh.cat || cats[0]) === x}" style="${(sh.cat || cats[0]) === x ? 'background:var(--accent);color:var(--accent-ink);border-color:var(--accent)' : ''}">${esc(x)}</button>`).join('')}</div></div>
+        <div class="field"><label for="f-tx-note">Note</label><input class="inp" id="f-tx-note" placeholder="${inc ? 'e.g. Coaching session' : 'e.g. Biedronka'}" maxlength="100" autocomplete="off"></div>
+        <div class="sub">EUR and USD are converted to PLN at ${fmt(c.fx.EUR, 2)} and ${fmt(c.fx.USD, 2)}. Change rates in Settings.</div>
+        <div><button class="btn primary" type="submit">${inc ? 'Add income' : 'Add expense'}</button></div>
+      </form></div>`;
+    return;
+  }
+  if (sh.type === 'settings') {
+    const t = todayISO(), act = c.habits.filter(h => !h.to || h.to > t);
+    el.innerHTML = `<div class="sheet-card" role="dialog" aria-modal="true" aria-label="Settings">
+      <div class="sheet-h"><h2 style="font-size:20px">Settings</h2>${close}</div>
+      <div class="stack">
+        <div class="eyebrow">Daily targets</div>
+        <div class="fields">
+          <div class="field"><label for="s-kcal">Calories</label><div class="unit"><input class="inp" id="s-kcal" inputmode="numeric" data-setting="kcalTarget" value="${c.kcalTarget}"><span>kcal</span></div></div>
+          <div class="field"><label for="s-prot">Protein (optional)</label><div class="unit"><input class="inp" id="s-prot" inputmode="numeric" data-setting="proteinTarget" value="${c.proteinTarget ?? ''}"><span>g</span></div></div>
+        </div>
+        <div class="eyebrow">Daily habits</div>
+        <div class="sub">Removing a habit keeps its history. Changes apply from today.</div>
+        <div class="list">${act.map(h => `<div class="li"><input class="inp" id="s-h-${esc(h.id)}" data-habit-name="${esc(h.id)}" value="${esc(h.name)}" maxlength="80" aria-label="Habit name">${delBtn('habit', h.id, 'Remove habit')}</div>`).join('')}</div>
+        <form class="row" data-form="habit-add"><input class="inp" id="s-h-new" placeholder="New habit" maxlength="80" autocomplete="off"><button class="btn" type="submit">Add habit</button></form>
+        <div class="eyebrow">Expense categories</div>
+        <div class="cats">${c.expenseCats.map(x => `<span class="chip">${esc(x)} ${S.confirm === 'cat:e:' + x ? `<button class="confirm" data-act="del" data-kind="cat" data-id="e:${esc(x)}">Remove</button>` : `<button class="x" style="width:20px;height:20px" data-act="del" data-kind="cat" data-id="e:${esc(x)}" aria-label="Remove ${esc(x)}">×</button>`}</span>`).join('')}</div>
+        <form class="row" data-form="cat-add" data-k="e"><input class="inp" id="s-ce-new" placeholder="New expense category" maxlength="40" autocomplete="off"><button class="btn" type="submit">Add</button></form>
+        <div class="eyebrow">Income categories</div>
+        <div class="cats">${c.incomeCats.map(x => `<span class="chip">${esc(x)} ${S.confirm === 'cat:i:' + x ? `<button class="confirm" data-act="del" data-kind="cat" data-id="i:${esc(x)}">Remove</button>` : `<button class="x" style="width:20px;height:20px" data-act="del" data-kind="cat" data-id="i:${esc(x)}" aria-label="Remove ${esc(x)}">×</button>`}</span>`).join('')}</div>
+        <form class="row" data-form="cat-add" data-k="i"><input class="inp" id="s-ci-new" placeholder="New income category" maxlength="40" autocomplete="off"><button class="btn" type="submit">Add</button></form>
+        <div class="eyebrow">Exchange rates to PLN</div>
+        <div class="fields">
+          <div class="field"><label for="s-eur">1 EUR</label><div class="unit"><input class="inp" id="s-eur" inputmode="decimal" data-setting="fx.EUR" value="${c.fx.EUR}"><span>zł</span></div></div>
+          <div class="field"><label for="s-usd">1 USD</label><div class="unit"><input class="inp" id="s-usd" inputmode="decimal" data-setting="fx.USD" value="${c.fx.USD}"><span>zł</span></div></div>
+        </div>
+        <div class="eyebrow">Google calendars</div>
+        ${S.calendars ? `<div class="sub">Tap a calendar to show or hide it in the tracker.</div>${calLegend()}` : `<div class="sub">${S.mcp ? 'Loading your calendars…' : 'Sign in with Google to see your calendars.'}</div>`}
+        <div class="eyebrow">Backup</div>
+        ${S.dl ? `<div class="sub">Download a copy of everything you've logged. The Excel file has one sheet each for days, training, money, subscriptions, savings and goals.</div>
+        <div class="row"><button class="btn primary" data-act="export-xlsx" ${S.exporting ? 'disabled' : ''}>${S.exporting === 'xlsx' ? 'Preparing…' : 'Export to Excel (.xlsx)'}</button><button class="btn" data-act="export-json" ${S.exporting ? 'disabled' : ''}>Full backup (.json)</button></div>` : ''}
+        <div class="row"><button class="btn" data-act="import-json">Import backup (.json)</button></div>
+        <div class="sub">Importing replaces everything in the tracker with the backup.</div>
+        <div class="eyebrow">Account</div>
+        <div class="sub">${window.LT && LT.account() ? `Signed in as ${esc(LT.account())}. ` : ''}Your data is saved on your Google Drive in <b>Lifetracker / lifetracker-data.json</b> and kept on this device, so it also works offline.</div>
+        <div class="row">${window.LT && LT.signedIn() ? `<button class="btn" data-act="lt-sync">Sync now</button><button class="btn danger" data-act="lt-signout">Sign out</button>` : `<button class="btn primary" data-act="lt-signin">Sign in with Google</button>`}</div>
+        <div class="sub">Tracking since ${esc(fmtLong(c.start))} ${c.start.slice(0, 4)}.</div>
+      </div></div>`;
+  }
+}
+
+/* ---------- main render ---------- */
+const TABS = [
+  ['today', 'Today', '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'],
+  ['health', 'Health', '<polyline points="3 12 7 12 10 5 14 19 17 12 21 12"/>'],
+  ['money', 'Money', '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.2"/>'],
+  ['goals', 'Goals', '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/>'],
+  ['review', 'Review', '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'],
+  ['calendar', 'Calendar', '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>']
+];
+function renderTabs() {
+  $('#tabs').innerHTML = TABS.map(([id, l, ic]) => `<button class="tab" data-act="tab" data-v="${id}" ${S.tab === id ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24">${ic}</svg>${l}</button>`).join('');
+}
+function ensureWatches() {
+  if (!S.mcp) return;
+  const d = viewDate(); watchCal('day', d, addDays(d, 1));
+  if (S.tab === 'calendar') { const r = calRange(); watchCal('range', r.start, r.end); }
+}
+let pendingRender = false, ptrDown = false;
+function captureUI() {
+  const st = { vals: {}, open: {} };
+  document.querySelectorAll('#main input[id], #main select[id], #sheet input[id], #sheet select[id]').forEach(el => {
+    if (el.dataset.dayField || el.dataset.setting || el.dataset.habitName) return;
+    if (el.value !== el.defaultValue) st.vals[el.id] = el.value;
+  });
+  document.querySelectorAll('#main details[id]').forEach(d => { st.open[d.id] = d.open; });
+  return st;
+}
+function restoreUI(st) {
+  for (const id in st.vals) { const el = document.getElementById(id); if (el) el.value = st.vals[id]; }
+  for (const id in st.open) { const d = document.getElementById(id); if (d) d.open = st.open[id]; }
+}
+function focusedInput() { const a = document.activeElement; return a && $('#app').contains(a) && a.matches('input:not([type=checkbox]),select,textarea') ? a : null; }
+function scheduleRender() { if (focusedInput() || ptrDown) { pendingRender = true; return; } render(); }
+function render() {
+  pendingRender = false;
+  renderTabs(); setSaveState();
+  const main = $('#main');
+  for (const k in charts) delete charts[k];
+  if (S.status === 'nodb') { main.innerHTML = `<div class="card" style="max-width:560px;margin:40px auto"><h2>Couldn't open your tracker</h2><p class="sub">Reload the page. If it keeps happening, sign in with Google again.</p></div>`; renderSheet(); return; }
+  if (S.status === 'loading') { main.innerHTML = `<div class="loading">Loading your tracker…</div>`; renderSheet(); return; }
+  ensureWatches();
+  const y = window.scrollY, ui = captureUI();
+  main.innerHTML = S.tab === 'today' ? renderToday() : S.tab === 'health' ? renderHealth() : S.tab === 'money' ? renderMoney() : S.tab === 'goals' ? renderGoals() : S.tab === 'review' ? renderReview() : renderCalendar();
+  renderSheet();
+  restoreUI(ui);
+  drawCharts();
+  window.scrollTo(0, y);
+}
+let toastT;
+function toast(msg, ms = 2200) { const el = $('#toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, ms); }
+function go(tab) { S.tab = tab; S.confirm = null; render(); window.scrollTo(0, 0); }
+
+/* ---------- actions ---------- */
+function toggleGoal(id) { const g = S.goals.find(x => x.id === id); if (!g) return; S.goals = S.goals.map(x => x.id === id ? { ...x, done: !g.done } : x); mergeDoc('goals', id, { done: !g.done, doneAt: !g.done ? Date.now() : null }); }
+function doDelete(kind, id) {
+  if (kind === 'workout') { const d = viewDate(); const wo = (day(d).workouts || []).filter(w => w.id !== id); saveDay(d, { workouts: wo }); }
+  else if (kind === 'tx') {
+    const x = S.tx.find(z => z.id === id); delDoc('tx', id);
+    if (x && x.source === 'recurring' && x.recId) { const r = S.rec.find(z => z.id === x.recId); if (r) mergeDoc('recurring', r.id, { skip: [...new Set([...(r.skip || []), x.month || x.date.slice(0, 7)])] }); }
+  }
+  else if (kind === 'ev') deleteEvent(id);
+  else if (kind === 'rec') delDoc('recurring', id);
+  else if (kind === 'sav') delDoc('savings', id);
+  else if (kind === 'goal') { delDoc('goals', id); children(id).forEach(ch => mergeDoc('goals', ch.id, { parent: null })); }
+  else if (kind === 'habit') { const t = todayISO(); const hs = cfg().habits.map(h => h.id === id ? { ...h, to: t, from: h.from || cfg().start } : h).filter(h => !(h.id === id && (h.from || cfg().start) >= t)); saveSettings({ habits: hs }); }
+  else if (kind === 'cat') { const [k, ...rest] = id.split(':'); const name = rest.join(':'); const key = k === 'e' ? 'expenseCats' : 'incomeCats'; saveSettings({ [key]: cfg()[key].filter(x => x !== name) }); }
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-act]');
+  if (!b) { if (S.confirm) { S.confirm = null; render(); } if (ev.target.id === 'sheet') { S.sheet = null; renderSheet(); } return; }
+  const a = b.dataset.act, v = b.dataset.v, id = b.dataset.id, t = todayISO();
+  if (a !== 'del' && S.confirm) S.confirm = null;
+  switch (a) {
+    case 'tab': go(v); return;
+    case 'day': { const nd = addDays(viewDate(), Number(b.dataset.dir)); S.date = nd >= t ? null : nd; break; }
+    case 'day-today': S.date = null; break;
+    case 'habit': { const d = viewDate(), cur = !!(day(d).habits || {})[id]; saveDay(d, { habits: { [id]: !cur } }); break; }
+    case 'goal-toggle': toggleGoal(id); break;
+    case 'carry': { const d = todayISO(), dg = goalsFor('day', d); goalsFor('day', addDays(d, -1)).filter(g => !g.done && !dg.some(x => x.title === g.title)).forEach((g, i) => setDoc('goals', rid(), { title: g.title, level: 'day', period: d, parent: null, done: false, created: Date.now() + i, from: g.id })); toast('Copied to today'); break; }
+    case 'goto-goals': S.goalsUI = { level: b.dataset.level, anchor: b.dataset.d || viewDate() }; go('goals'); return;
+    case 'wtype': S.wtype = v; document.querySelectorAll('[data-act="wtype"]').forEach(x => x.setAttribute('aria-pressed', x.dataset.v === v)); return;
+    case 'del': { const key = `${b.dataset.kind}:${id}`; if (S.confirm === key) { S.confirm = null; doDelete(b.dataset.kind, id); } else S.confirm = key; break; }
+    case 'tx-new': S.sheet = { type: 'tx', kind: b.dataset.kind, date: S.tab === 'today' ? viewDate() : (S.tab === 'money' && S.money.anchor && S.money.anchor.slice(0, 7) < t.slice(0, 7) ? monthEnd(S.money.anchor.slice(0, 7)) : t) }; renderSheet(); setTimeout(() => { const f = $('#f-tx-amt'); f && f.focus(); }, 30); return;
+    case 'tx-kind': S.sheet.kind = v; S.sheet.cat = null; renderSheet(); return;
+    case 'tx-cat': S.sheet.cat = v; document.querySelectorAll('[data-act="tx-cat"]').forEach(x => { const on = x.dataset.v === v; x.setAttribute('aria-pressed', on); x.style.cssText = on ? 'background:var(--accent);color:var(--accent-ink);border-color:var(--accent)' : ''; }); return;
+    case 'sheet-close': S.sheet = null; renderSheet(); if (pendingRender) render(); return;
+    case 'open-settings': S.sheet = { type: 'settings' }; renderSheet(); return;
+    case 'hrange': S.health.range = Number(v); break;
+    case 'mon-nav': { const mk = (S.money.anchor || t).slice(0, 7); const nm = Number(b.dataset.dir) > 0 ? nextMonth(mk) : prevMonth(mk); S.money.anchor = nm >= t.slice(0, 7) ? null : nm + '-01'; break; }
+    case 'rec-pause': { const r = S.rec.find(x => x.id === id); if (r) { const resume = r.active === false; mergeDoc('recurring', id, resume ? { active: true, start: t.slice(0, 7) > r.start ? t.slice(0, 7) : r.start } : { active: false }); } break; }
+    case 'glevel': S.goalsUI.level = v; break;
+    case 'gnav': S.goalsUI.anchor = shift(S.goalsUI.level, S.goalsUI.anchor || t, Number(b.dataset.dir)); break;
+    case 'rlevel': S.review.level = v; break;
+    case 'rnav': S.review.anchor = shift(S.review.level, S.review.anchor || t, Number(b.dataset.dir)); break;
+    case 'r-today': S.review.anchor = null; break;
+    case 'open-day': S.review = { level: 'day', anchor: b.dataset.d }; go('review'); return;
+    case 'open-month': S.review = { level: 'month', anchor: b.dataset.m + '-01' }; go('review'); return;
+    case 'edit-day': S.date = b.dataset.d >= t ? null : b.dataset.d; go('today'); return;
+    case 'cview': S.calUI.view = v; break;
+    case 'cnav': { const a0 = S.calUI.anchor || t; S.calUI.anchor = S.calUI.view === 'week' ? addDays(a0, 7 * Number(b.dataset.dir)) : (Number(b.dataset.dir) > 0 ? nextMonth(a0.slice(0, 7)) : prevMonth(a0.slice(0, 7))) + '-01'; break; }
+    case 'c-today': S.calUI.anchor = null; S.calUI.sel = null; break;
+    case 'c-sel': S.calUI.sel = b.dataset.d; break;
+    case 'cal-retry': calRetry(b.dataset.slot); return;
+    case 'ev-new': if (!S.mcp) return; newEventSheet(b.dataset.d || todayISO()); return;
+    case 'cal-toggle': { const hid = new Set(cfg().hiddenCals || []); hid.has(id) ? hid.delete(id) : hid.add(id); const list = [...hid]; S.settings = { ...(S.settings || {}), hiddenCals: list }; saveSettings({ hiddenCals: list }); render(); return; }
+    case 'export-xlsx': exportXLSX(); return;
+    case 'export-json': exportJSON(); return;
+    case 'import-json': if (window.LT) LT.pickImport(); return;
+    case 'lt-signin': if (window.LT) LT.signIn(); return;
+    case 'lt-sync': if (window.LT) LT.sync(); return;
+    case 'lt-signout': if (window.LT && confirm('Sign out? Your data stays on Google Drive.')) LT.signOut(); return;
+  }
+  render();
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && S.sheet) { S.sheet = null; renderSheet(); } });
+document.addEventListener('focusout', () => { setTimeout(() => { if (pendingRender && !focusedInput() && !ptrDown) render(); }, 0); });
+document.addEventListener('pointerdown', () => { ptrDown = true; }, true);
+const ptrEnd = () => { ptrDown = false; setTimeout(() => { if (pendingRender && !focusedInput() && !ptrDown) render(); }, 80); };
+document.addEventListener('pointerup', ptrEnd, true); document.addEventListener('pointercancel', ptrEnd, true);
+window.addEventListener('resize', (() => { let tm; return () => { clearTimeout(tm); tm = setTimeout(drawCharts, 150); }; })());
+
+document.addEventListener('change', ev => {
+  const el = ev.target;
+  if (el.id === 'f-ev-allday' && S.sheet && S.sheet.type === 'event') { S.sheet.allDay = el.checked; renderSheet(); return; }
+  if (el.dataset.dayField) {
+    const f = el.dataset.dayField, ty = el.dataset.type, d = viewDate();
+    let v = el.value;
+    if (ty === 'dec' || ty === 'int' || ty === 'score') {
+      v = num(v);
+      if (Number.isNaN(v)) { toast('Enter a number, for example 74.2'); return; }
+      if (v != null && ty === 'int') v = Math.round(v);
+      if (v != null && ty === 'dec') v = Math.round(v * 10) / 10;
+      if (v != null && ty === 'score') v = Math.round(v);
+      if (v != null && ty === 'score' && (v < 1 || v > 100)) { toast('Sleep Score goes from 1 to 100'); return; }
+      if (v != null && v < 0) { toast('Values can\'t be negative'); return; }
+    } else if (v === '') v = null;
+    const parts = f.split('.'); const patch = parts.length === 2 ? { [parts[0]]: { [parts[1]]: v } } : { [f]: v };
+    saveDay(d, patch);
+  } else if (el.dataset.setting) {
+    const f = el.dataset.setting; let v = num(el.value);
+    if (Number.isNaN(v) || (v != null && v <= 0)) { toast('Enter a positive number'); return; }
+    if (f === 'kcalTarget' && v == null) v = 3000;
+    if (f.startsWith('fx.')) { if (v == null) return; saveSettings({ fx: { ...cfg().fx, [f.slice(3)]: v } }); }
+    else saveSettings({ [f]: v == null ? null : Math.round(v) });
+  } else if (el.dataset.habitName) {
+    const name = el.value.trim(); if (!name) return;
+    saveSettings({ habits: cfg().habits.map(h => h.id === el.dataset.habitName ? { ...h, name } : h) });
+  }
+});
+
+document.addEventListener('submit', ev => {
+  const f = ev.target.closest('form[data-form]'); if (!f) return;
+  ev.preventDefault();
+  const k = f.dataset.form, t = todayISO(), val = s => ($(s, f) || {}).value || '';
+  const amountOk = (a, msg = 'Enter an amount, for example 49.99') => { if (a == null || Number.isNaN(a) || a <= 0) { toast(msg); return false; } return true; };
+  if (k === 'goal-day') { const title = val('#f-daygoal').trim(); if (!title) return; setDoc('goals', rid(), { title, level: 'day', period: viewDate(), parent: null, done: false, created: Date.now() }); f.reset(); }
+  else if (k === 'goal-new') {
+    const title = val('#f-goal-title').trim(); if (!title) return;
+    const lv = S.goalsUI.level, p = period(lv, S.goalsUI.anchor || t);
+    setDoc('goals', rid(), { title, level: lv, period: p.key, parent: val('#f-goal-parent') || null, done: false, created: Date.now() }); f.reset();
+  }
+  else if (k === 'workout') {
+    const min = num(val('#f-wmin')), kc = num(val('#f-wkcal'));
+    if (min == null || Number.isNaN(min) || min <= 0) { toast('Enter the session length in minutes'); return; }
+    if (Number.isNaN(kc)) { toast('Calories burned must be a number'); return; }
+    const d = viewDate(); const wo = [...(day(d).workouts || []), { id: rid(), type: S.wtype || 'gym', min: Math.round(min), kcal: kc == null ? null : Math.round(kc), note: val('#f-wnote').trim() || null }];
+    saveDay(d, { workouts: wo }); f.reset(); toast('Session saved');
+  }
+  else if (k === 'tx') {
+    const a = num(val('#f-tx-amt')); if (!amountOk(a)) return;
+    const cur = val('#f-tx-cur') || 'PLN', date = val('#f-tx-date') || t, sh = S.sheet, c = cfg();
+    const cats = sh.kind === 'income' ? c.incomeCats : c.expenseCats;
+    setDoc('tx', rid(), { date, kind: sh.kind, amount: Math.round(a * 100) / 100, currency: cur, pln: Math.round(toPLN(a, cur) * 100) / 100, category: sh.cat || cats[0], note: val('#f-tx-note').trim() || null, source: 'manual', created: Date.now() });
+    S.sheet = null; renderSheet(); toast(sh.kind === 'income' ? 'Income added' : 'Expense added'); if (pendingRender) render();
+  }
+  else if (k === 'rec-income' || k === 'rec-sub') {
+    const p = k === 'rec-income' ? '#f-ri-' : '#f-rs-';
+    const name = val(p + 'name').trim(), a = num(val(p + 'amt')), dd = Math.round(num(val(p + 'day')));
+    if (!name) return; if (!amountOk(a)) return;
+    if (!(dd >= 1 && dd <= 31)) { toast('Day must be between 1 and 31'); return; }
+    const id = rid();
+    setDoc('recurring', id, { kind: k === 'rec-income' ? 'income' : 'subscription', name, amount: Math.round(a * 100) / 100, currency: val(p + 'cur') || 'PLN', day: dd, cycle: k === 'rec-sub' ? (val(p + 'cycle') || 'monthly') : 'monthly', start: val(p + 'start') || t.slice(0, 7), category: val(p + 'cat'), active: true, skip: [], created: Date.now() })
+      .then(() => { S.genDone = null; setTimeout(() => { if (S.genDone !== todayISO()) { S.genDone = todayISO(); generateRecurring(); } }, 800); });
+    f.reset(); f.closest('details').open = false; toast(k === 'rec-income' ? 'Monthly income added' : 'Subscription added');
+  }
+  else if (k === 'event') {
+    const sh = S.sheet; if (!sh || sh.saving || !S.mcp) return;
+    const title = val('#f-ev-title').trim(), calId = val('#f-ev-cal'), date = val('#f-ev-date');
+    if (!title || !date) return; if (!calId) { toast('Choose a calendar'); return; }
+    let input;
+    if (sh.allDay) input = { calendarId: calId, summary: title, allDay: true, startTime: `${date}T00:00:00`, endTime: `${addDays(date, 1)}T00:00:00` };
+    else {
+      const st = val('#f-ev-start'), en = val('#f-ev-end');
+      if (!st || !en) { toast('Set a start and end time'); return; }
+      if (en <= st) { toast('The end time must be after the start time'); return; }
+      input = { calendarId: calId, summary: title, startTime: `${date}T${st}:00`, endTime: `${date}T${en}:00` };
+    }
+    const loc = val('#f-ev-loc').trim(); if (loc) input.location = loc;
+    S.lastCal = calId; sh.saving = true; renderSheet();
+    S.mcp.callTool(CAL, 'create_event', input)
+      .then(() => { if (S.sheet === sh) S.sheet = null; renderSheet(); toast('Event added'); refreshCal(); })
+      .catch(e => { sh.saving = false; if (S.sheet === sh) renderSheet(); toast(calWriteMsg(e, 'add'), 5500); const c = e && e.code; if (c === 'server_unavailable' || c === 'upstream_error') refreshCal(); });
+  }
+  else if (k === 'sav-new') {
+    const name = val('#f-sv-name').trim(), a = num(val('#f-sv-target')); if (!name || !amountOk(a, 'Enter a target amount')) return;
+    setDoc('savings', rid(), { name, target: Math.round(a * 100) / 100, currency: 'PLN', by: val('#f-sv-by') || null, contributions: [], created: Date.now() }); f.reset(); f.closest('details').open = false;
+  }
+  else if (k === 'sav-add') {
+    const g = S.sav.find(x => x.id === f.dataset.id); if (!g) return;
+    const a = num(($('input', f) || {}).value); if (a == null || Number.isNaN(a) || a === 0) { toast('Enter an amount. Use a minus sign to take money out.'); return; }
+    mergeDoc('savings', g.id, { contributions: [...(g.contributions || []), { id: rid(), date: t, amount: a, pln: Math.round(a * 100) / 100 }] }); f.reset(); toast(a > 0 ? 'Added to ' + g.name : 'Withdrawn from ' + g.name);
+  }
+  else if (k === 'habit-add') {
+    const name = val('#s-h-new').trim(); if (!name) return;
+    const base = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 24) || 'habit';
+    saveSettings({ habits: [...cfg().habits, { id: base + '-' + rid().slice(0, 4), name, from: t }] }); f.reset();
+  }
+  else if (k === 'cat-add') {
+    const inp = $('input', f), name = inp.value.trim(); if (!name) return;
+    const key = f.dataset.k === 'e' ? 'expenseCats' : 'incomeCats'; const list = cfg()[key];
+    if (list.some(x => x.toLowerCase() === name.toLowerCase())) { toast('That category already exists'); return; }
+    saveSettings({ [key]: [...list, name] }); f.reset();
+  }
+});
+
+/* ---------- export ---------- */
+let xlsxLoading = null;
+function loadXLSX() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (!xlsxLoading) xlsxLoading = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = () => window.XLSX ? res(window.XLSX) : rej(new Error('load'));
+    s.onerror = () => { xlsxLoading = null; rej(new Error('load')); };
+    document.head.appendChild(s);
+  });
+  return xlsxLoading;
+}
+async function saveFile(filename, data) {
+  try { await S.dl.save({ filename, data }); toast('Export ready'); }
+  catch (e) {
+    const c = e && e.code;
+    if (c === 'declined') return;
+    toast(c === 'rate_limited' ? 'Another save prompt is already open. Finish it, then try again.'
+      : c === 'extension_not_enabled' ? 'Excel files can\'t be saved in this view. Use the full backup instead.'
+      : c === 'too_large' ? 'The file is too large to save here.'
+      : 'Export isn\'t available in this view.', 4500);
+  }
+}
+const sortDate = (a, b) => (a.date || '').localeCompare(b.date || '') || (a.created || 0) - (b.created || 0);
+function exportRows() {
+  const c = cfg(), allHabits = c.habits;
+  const ds = Object.keys(S.days).sort();
+  const days = ds.map(d => {
+    const x = S.days[d], sl = x.sleep || {}, m = sleepMin(sl), hv = x.habits || {}, st = d >= c.start ? dayHabitStat(d) : null;
+    const row = { Date: d, 'Weight (kg)': x.weight ?? '', 'Sleep Score': sl.score ?? '', 'Fell asleep': sl.bed || '', 'Woke up': sl.wake || '', 'Sleep (h)': m == null ? '' : Math.round(m / 6) / 10, Calories: x.kcal ?? '', 'Protein (g)': x.protein ?? '', 'Habits done': st ? st.done : '', 'Habits total': st ? st.total : '' };
+    allHabits.forEach(h => { const act = activeHabits(d).some(a => a.id === h.id) && d >= c.start; row[h.name] = act ? (hv[h.id] ? 'Yes' : 'No') : ''; });
+    return row;
+  });
+  const training = ds.flatMap(d => (S.days[d].workouts || []).map(w => ({ Date: d, Type: wType(w.type).name, Minutes: w.min ?? '', 'Kcal burned': w.kcal ?? '', Note: w.note || '' })));
+  const moneyRows = S.tx.slice().sort(sortDate).map(x => ({ Date: x.date, Type: x.kind === 'income' ? 'Income' : 'Expense', Category: x.category || '', Note: x.note || '', Amount: x.amount, Currency: x.currency || 'PLN', 'Amount (PLN)': x.pln, Source: x.source === 'recurring' ? 'Automatic' : 'Manual' }));
+  const recurring = S.rec.slice().sort((a, b) => (a.created || 0) - (b.created || 0)).map(r => ({ Kind: r.kind === 'income' ? 'Monthly income' : 'Subscription', Name: r.name, Amount: r.amount, Currency: r.currency || 'PLN', Billing: r.cycle === 'yearly' ? 'Yearly' : 'Monthly', Day: r.day, 'First month': r.start, Category: r.category || '', Status: r.active === false ? 'Paused' : 'Active' }));
+  const savings = S.sav.flatMap(g => { const cs = (g.contributions || []); const base = { Goal: g.name, 'Target (PLN)': g.target, 'Target date': g.by || '' }; return cs.length ? cs.map(x => ({ ...base, Date: x.date, 'Amount (PLN)': x.pln })) : [{ ...base, Date: '', 'Amount (PLN)': '' }]; });
+  const order = { year: 0, month: 1, week: 2, day: 3 };
+  const goals = S.goals.slice().sort((a, b) => order[a.level] - order[b.level] || String(a.period).localeCompare(String(b.period)) || (a.created || 0) - (b.created || 0)).map(g => { const p = g.parent ? S.goals.find(x => x.id === g.parent) : null; return { Level: g.level[0].toUpperCase() + g.level.slice(1), Period: g.period, Goal: g.title, Done: g.done ? 'Yes' : 'No', 'Part of': p ? p.title : '' }; });
+  return { days, training, moneyRows, recurring, savings, goals };
+}
+async function exportXLSX() {
+  if (!S.dl || S.exporting) return;
+  S.exporting = 'xlsx'; renderSheet();
+  try {
+    const X = await loadXLSX(), r = exportRows(), wb = X.utils.book_new();
+    const add = (name, rows, empty) => { const ws = rows.length ? X.utils.json_to_sheet(rows) : X.utils.aoa_to_sheet([[empty]]); if (rows.length) ws['!cols'] = Object.keys(rows[0]).map(k => ({ wch: Math.max(10, Math.min(40, k.length + 2, ...rows.slice(0, 200).map(x => String(x[k] ?? '').length + 2))) })); X.utils.book_append_sheet(wb, ws, name); };
+    add('Days', r.days, 'No days logged yet');
+    add('Training', r.training, 'No sessions logged yet');
+    add('Money', r.moneyRows, 'No income or expenses yet');
+    add('Subscriptions & income', r.recurring, 'No monthly income or subscriptions yet');
+    add('Savings', r.savings, 'No savings goals yet');
+    add('Goals', r.goals, 'No goals yet');
+    const buf = X.write(wb, { bookType: 'xlsx', type: 'array' });
+    S.exporting = null; renderSheet();
+    await saveFile(`lifetracker-${todayISO()}.xlsx`, new Uint8Array(buf));
+  } catch (e) { toast('The Excel export could not be prepared. Try again, or use the full backup.', 4500); }
+  finally { S.exporting = null; renderSheet(); }
+}
+async function exportJSON() {
+  if (!S.dl || S.exporting) return;
+  const data = { app: 'Lifetracker', exportedAt: new Date().toISOString(), settings: S.settings, days: Object.values(S.days).sort(sortDate), transactions: S.tx.slice().sort(sortDate), recurring: S.rec, savings: S.sav, goals: S.goals };
+  await saveFile(`lifetracker-backup-${todayISO()}.json`, JSON.stringify(data, null, 2));
+}
+
+/* ---------- midnight rollover ---------- */
+setInterval(() => {
+  const t = todayISO();
+  if (t !== S.lastToday) {
+    S.lastToday = t;
+    if (S.date && S.date >= t) S.date = null;
+    if (S.genDone !== t && KEYS.every(k => S.fresh[k])) { S.genDone = t; generateRecurring(); }
+    scheduleRender();
+  }
+}, 30000);
+
+/* ---------- boot ---------- */
+window.addEventListener('lt-sync', () => { setSaveState(); if (S.sheet && S.sheet.type === 'settings') renderSheet(); });
+render();
+const cl = window.claude;
+if (!cl || typeof cl.use !== 'function') { S.status = 'nodb'; render(); }
+else {
+  cl.use('db').then(db => { if (!db) { S.status = 'nodb'; render(); return; } S.db = db; subscribe(); }).catch(() => { S.status = 'nodb'; render(); });
+  cl.use('mcp').then(m => { S.mcp = m || null; loadCalendars(); scheduleRender(); }).catch(() => { S.mcp = null; });
+  cl.use('downloads').then(dl => { S.dl = dl || null; if (S.sheet) renderSheet(); }).catch(() => { S.dl = null; });
+}
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+</script>
+</body>
+</html>
