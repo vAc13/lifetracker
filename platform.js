@@ -33,6 +33,19 @@ function merge(a, b) {
 }
 const emptyStore = () => Object.fromEntries(COLLS.map(c => [c, {}]));
 
+/* ---------- quick add links (Apple Shortcuts) ----------
+   ?add=expense|income&amount=23.5&cat=Groceries&note=Biedronka&cur=PLN
+   Saved on the device first, so the entry survives a sign-in redirect. */
+(function readQuickAdd() {
+  const q = new URLSearchParams(location.search);
+  if (!q.has('add')) return;
+  const item = { kind: q.get('add') === 'income' ? 'income' : 'expense', amount: q.get('amount'), cat: q.get('cat'), note: q.get('note'), cur: (q.get('cur') || 'PLN').toUpperCase(), date: q.get('date'), id: q.get('t') || null, at: Date.now() };
+  const list = lsGet('lt.quick') || [];
+  if (!item.id || !list.some(x => x.id === item.id)) list.push(item);
+  lsSet('lt.quick', list);
+  history.replaceState(null, '', location.pathname + location.hash);
+})();
+
 /* ---------- auth ---------- */
 let auth = lsGet(LS.auth) || {};
 let authNote = null;
@@ -387,7 +400,8 @@ window.claude = {
 window.LT = {
   signIn: () => signIn(false), signOut, pickImport, sync: () => scheduleSync(0),
   state: () => state, account: () => auth.hint || null, error: () => lastError,
-  pending: () => ops.length, signedIn: () => !!token()
+  pending: () => ops.length, signedIn: () => !!token(),
+  takeQuick: () => { const l = lsGet('lt.quick') || []; lsSet('lt.quick', null); return l; }
 };
 
 /* ---------- boot ---------- */

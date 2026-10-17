@@ -452,9 +452,32 @@ function subscribe() {
 const KEYS = ['days', 'tx', 'rec', 'sav', 'goals', 'settings'];
 function afterData() {
   if (S.status === 'loading' && KEYS.every(k => S.loaded[k])) S.status = 'ready';
+  if (S.status === 'ready') quickAdd();
   setSaveState();
   if (KEYS.every(k => S.fresh[k]) && S.genDone !== todayISO()) { S.genDone = todayISO(); generateRecurring(); }
   scheduleRender();
+}
+
+/* ---------- quick add from Apple Shortcuts links ---------- */
+function quickAdd() {
+  if (!window.LT || !LT.takeQuick) return;
+  const items = LT.takeQuick(); if (!items.length) return;
+  const c = cfg(), msgs = [];
+  items.forEach(q => {
+    const a = num(q.amount);
+    if (a == null || Number.isNaN(a) || a <= 0) { msgs.push('Shortcut entry skipped: the amount was missing'); return; }
+    const kind = q.kind === 'income' ? 'income' : 'expense', cats = kind === 'income' ? c.incomeCats : c.expenseCats;
+    const want = String(q.cat || '').trim().toLowerCase();
+    const cat = cats.find(x => x.toLowerCase() === want) || cats.find(x => want && x.toLowerCase().startsWith(want)) || (cats.includes('Other') ? 'Other' : cats[cats.length - 1]);
+    const cur = CURRENCIES.includes(q.cur) ? q.cur : 'PLN';
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(q.date || '') && q.date <= todayISO() ? q.date : todayISO();
+    const id = q.id ? 'sc-' + String(q.id).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40) : rid();
+    if (S.tx.some(x => x.id === id)) return;
+    setDoc('tx', id, { date, kind, amount: Math.round(a * 100) / 100, currency: cur, pln: Math.round(toPLN(a, cur) * 100) / 100, category: cat, note: (q.note || '').trim().slice(0, 100) || null, source: 'shortcut', created: Date.now() });
+    S.tx = [...S.tx, { id, date, kind, amount: a, currency: cur, pln: toPLN(a, cur), category: cat, created: Date.now() }];
+    msgs.push(`${kind === 'income' ? 'Income' : 'Expense'} added: ${money(a, cur)} · ${cat}`);
+  });
+  if (msgs.length) setTimeout(() => toast(msgs.join(' · '), 4500), 50);
 }
 
 /* ---------- recurring income & subscriptions ---------- */
