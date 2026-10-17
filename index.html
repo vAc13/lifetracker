@@ -249,10 +249,16 @@ a.nm{color:inherit;text-decoration:none} a.nm:hover{text-decoration:underline}
 .event.ev-c{display:flex;flex-direction:column;gap:2px;min-width:0}
 .notice{border:1px dashed var(--line);border-radius:12px;padding:12px;font-size:13px;color:var(--ink-2);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
+/* day view: the page itself does not scroll, only the time grid does */
+html.cal-lock,html.cal-lock body{overflow:hidden;overscroll-behavior:none;height:100%}
+html.cal-lock body{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);bottom:0;width:100%}
+html.cal-lock .main{padding-bottom:0;padding-top:10px}
+.pagehead.compact{margin-bottom:8px;align-items:center}
+.pagehead.compact h1.display{font-size:28px;margin:0}
 /* day view: time grid (long-press an empty slot to create an event) */
-.dayv{padding:10px 0 0;gap:0;overflow:hidden}
-.wstrip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;padding:0 8px 8px}
-.wstrip button{border:0;background:none;border-radius:10px;padding:5px 0;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.04em}
+.dayv{padding:6px 0 0;gap:0;overflow:hidden}
+.wstrip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;padding:0 8px 6px}
+.wstrip button{border:0;background:none;border-radius:10px;padding:2px 0;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.04em}
 .wstrip button b{font-family:var(--f-display);font-stretch:80%;font-size:17px;font-weight:700;color:var(--ink);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-variant-numeric:tabular-nums}
 .wstrip button.today b{color:var(--crit-text)}
 .wstrip button[aria-pressed="true"] b{background:var(--ink);color:var(--bg)}
@@ -1419,7 +1425,7 @@ function renderDayView(a, st) {
 function fitGrid() {
   const g = $('#tgrid'); if (!g) return;
   const wide = innerWidth >= 900, tabs = $('#tabs').getBoundingClientRect();
-  const bottom = wide ? innerHeight - 16 : tabs.top - 10;
+  const bottom = wide ? innerHeight - 12 : tabs.top - 8;
   g.style.height = Math.max(300, Math.round(bottom - g.getBoundingClientRect().top)) + 'px';
   if (S.calUI.gridTop == null) { const n = new Date(); S.calUI.gridTop = Math.max(0, mm2y((S.calUI.anchor && S.calUI.anchor !== todayISO() ? 7 * 60 : n.getHours() * 60 + n.getMinutes() - 90))); }
   g.scrollTop = S.calUI.gridTop;
@@ -1582,8 +1588,8 @@ function renderCalendar() {
   const r = calRange(), t = todayISO(), sel = S.calUI.sel || t, st = calState('range'), c = cfg();
   const isDay = S.calUI.view === 'day';
   const navLbl = isDay ? fmtDM(r.start) : S.calUI.view === 'week' ? `W${weekNo(r.start)}` : fmtMonShort(r.mk) + ' ' + r.mk.slice(0, 4);
-  const head = `<div class="pagehead" ${isDay ? 'style="margin-bottom:10px"' : ''}><div class="grow"><div class="eyebrow">Calendar</div><h1 class="display">${esc(r.label)}</h1>${r.sub ? `<div class="sub">${esc(r.sub)}</div>` : ''}</div>${seg('cview', [['day', 'Day'], ['week', 'Week'], ['month', 'Month']], S.calUI.view)}</div>
-  <div class="row" style="margin-bottom:${isDay ? 10 : 14}px">${pnav('cnav', navLbl, '', false)}<button class="btn small" data-act="c-today">Today</button>${S.mcp && S.calendars ? `<button class="btn small primary" data-act="ev-new" data-d="${isDay ? r.start : S.calUI.sel || t}">+ Event</button>` : ''}</div>${isDay ? '' : `<div style="margin-bottom:14px">${calLegend()}</div>`}`;
+  const head = `<div class="pagehead ${isDay ? 'compact' : ''}"><div class="grow">${isDay ? '' : '<div class="eyebrow">Calendar</div>'}<h1 class="display">${esc(r.label)}</h1>${r.sub && !isDay ? `<div class="sub">${esc(r.sub)}</div>` : ''}</div>${seg('cview', [['day', 'Day'], ['week', 'Week'], ['month', 'Month']], S.calUI.view)}</div>
+  <div class="row" style="margin-bottom:${isDay ? 8 : 14}px">${pnav('cnav', navLbl, '', false)}<button class="btn small" data-act="c-today">Today</button>${S.mcp && S.calendars ? `<button class="btn small primary" data-act="ev-new" data-d="${isDay ? r.start : S.calUI.sel || t}">+ Event</button>` : ''}</div>${isDay ? '' : `<div style="margin-bottom:14px">${calLegend()}</div>`}`;
   let status = '';
   if (st.kind === 'nomcp') status = `<div class="notice">Sign in with Google to see your events.</div>`;
   else if (st.kind === 'err') status = calErrHTML('range', st.err);
@@ -1768,7 +1774,9 @@ function render() {
   if (S.status === 'nodb') { main.innerHTML = `<div class="card" style="max-width:560px;margin:40px auto"><h2>Couldn't open your tracker</h2><p class="sub">Reload the page. If it keeps happening, sign in with Google again.</p></div>`; renderSheet(); return; }
   if (S.status === 'loading') { main.innerHTML = `<div class="loading">Loading your tracker…</div>`; renderSheet(); return; }
   ensureWatches();
-  const y = window.scrollY, ui = captureUI();
+  const lock = S.tab === 'calendar' && S.calUI.view === 'day', root = document.documentElement;
+  if (lock !== root.classList.contains('cal-lock')) { if (lock) window.scrollTo(0, 0); root.classList.toggle('cal-lock', lock); }
+  const y = lock ? 0 : window.scrollY, ui = captureUI();
   main.innerHTML = S.tab === 'today' ? renderToday() : S.tab === 'health' ? renderHealth() : S.tab === 'money' ? renderMoney() : S.tab === 'goals' ? renderGoals() : S.tab === 'review' ? renderReview() : renderCalendar();
   renderSheet();
   restoreUI(ui);
