@@ -1340,7 +1340,7 @@ const ICON_CLOCK = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><pat
 function layoutDay(list, d) {
   const s0 = parse(d), e0 = parse(addDays(d, 1));
   const items = list.filter(e => !e.allDay).map(e => {
-    const s = Math.max(0, (Math.max(+e.start, +s0) - s0) / 6e4), en = Math.min(1440, (Math.min(+e.end, +e0) - s0) / 6e4);
+    const s = +e.start <= +s0 ? 0 : minsOf(e.start, d), en = +e.end >= +e0 ? 1440 : minsOf(e.end, d);
     return { e, s, en: Math.max(en, s + 15) };
   }).sort((a, b) => a.s - b.s || b.en - a.en);
   let cluster = [], cols = [], end = -1;
@@ -1515,7 +1515,9 @@ function liftable(e, date) {
   const s0 = parse(date), e0 = parse(addDays(date, 1));
   return +e.start >= +s0 && +e.end <= +e0;
 }
-const minsOf = (d, date) => Math.round((+d - +parse(date)) / 6e4);
+/* Wall-clock minutes from the start of `date` (DST-safe: a 23h/25h day still maps 10:00 → 600). */
+const minsOf = (d, date) => Math.round((+parse(iso(d)) - +parse(date)) / 864e5) * 1440 + d.getHours() * 60 + d.getMinutes();
+const atMins = (date, m) => { const [y, mo, dd] = date.split('-').map(Number); return new Date(y, mo - 1, dd, 0, m); };
 const minToISO = (date, m) => m >= 1440 ? `${addDays(date, 1)}T00:00:00` : `${date}T${m2hm(m)}:00`;
 /* Apple-style: hold an event to pick it up. It follows the finger (same length); the dots change start/end. */
 function liftEvent(g, ev) {
@@ -1530,7 +1532,7 @@ function saveEvTime(D) {
   if (!D || !D.evKey || (D.saved.s === D.s && D.saved.e === D.e)) return;
   const e = findEv(D.evKey); if (!e) return;
   const old = { start: e.start, end: e.end, saved: { ...D.saved } }, s = D.s, en = D.e, date = D.date;
-  e.start = new Date(+parse(date) + s * 6e4); e.end = new Date(+parse(date) + en * 6e4); D.saved = { s, e: en };
+  e.start = atMins(date, s); e.end = atMins(date, en); D.saved = { s, e: en };
   S.mcp.callTool(CAL, 'update_event', { calendarId: e.cal.id, eventId: e.id, startTime: minToISO(date, s), endTime: minToISO(date, en) })
     .then(() => { toast(`Moved to ${m2hm(s)}–${m2hm(en)}`); refreshCal(); })
     .catch(err => {
